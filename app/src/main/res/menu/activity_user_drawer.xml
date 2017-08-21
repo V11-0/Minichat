@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/home"
+            android:icon="@drawable/ic_home"
+            android:title="@string/home" />
+        <item
+            android:id="@+id/nav_messages"
+            android:icon="@drawable/ic_messages"
+            android:title="@string/drawer_messages" />
+    </group>
+
+    <item
+        android:title="@string/account_section" >
+        <menu>
+            <item
+                android:id="@+id/logout"
+                android:icon="@android:drawable/ic_lock_power_off"
+                android:title="@string/logout" />
+        </menu>
+    </item>
+
+    <item
+        android:title="@string/fastconfig_item_title">
+        <menu>
+            <item
+                android:id="@+id/check_update_drawer"
+                android:icon="@android:drawable/stat_sys_download"
+                android:title="@string/pref_update_title" />
+
+            <item
+                android:id="@+id/drawer_preferences"
+                android:icon="@android:drawable/ic_menu_preferences"
+                android:title="@string/preferences" />
+        </menu>
+    </item>
+
+</menu>

@@ -1,0 +1,30 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <ListPreference
+        android:defaultValue="1"
+        android:entries="@array/pref_example_list_titles"
+        android:entryValues="@array/pref_example_list_values"
+        android:key="fill_login"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null"
+        android:title="@string/pref_field_title"
+        android:summary="@string/pref_filed_summary"/>
+
+    <PreferenceCategory android:title="@string/app_colors">
+
+        <com.flask.colorpicker.ColorPickerPreference
+            android:key="PrimaryColor"
+            android:title="@string/primary_color_pref"
+            android:summary="@string/primary_color_summ"
+            app:lightnessSlider="true" />
+
+        <com.flask.colorpicker.ColorPickerPreference
+            android:key="AccentColor"
+            android:title="@string/accent_color_pref"
+            android:summary="@string/accent_color_summ"
+            app:lightnessSlider="true" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

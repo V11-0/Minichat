@@ -1,0 +1,113 @@
+<resources>
+    <string name="title_activity_main">Entrar</string>
+    <string name="help_textview">Para criar seu usuário clique nos 3 pontinhos no canto direito superior</string>
+    <string name="err_no_network">Você não está conectado a nenhuma rede Wi-Fi</string>
+    <string name="err_no_net_action">Conectar</string>
+    <string name="connected">Conectado!</string>
+    <string name="no_connection">Sem conexão, o App não funcionará sem uma conexão à internet</string>
+    <string name="title_new_user_act">Cadastrar Novo Usuário</string>
+    <string name="prompt_login">Nome de usuário ou E-mail</string>
+    <string name="prompt_user">Nome de usuário</string>
+    <string name="prompt_password">Senha</string>
+    <string name="prompt_confirm_password">Confirme a senha</string>
+    <string name="action_sign_in">Fazer Login</string>
+    <string name="error_field_required">Este campo é necessário</string>
+    <string name="error_user_length">O Usuário não deve conter mais de 70 caracteres</string>
+    <string name="error_user_special_chars">O Usuário não pode conter caracteres especiais</string>
+    <string name="error_email_lenght">Um E-mail não deve conter mais de 254 caracteres</string>
+    <string name="error_password_lenght_max">A senha deve ter um limite de 70 caracteres</string>
+    <string name="password_strength">Força da Senha:</string>
+    <string name="password_strong">Forte</string>
+    <string name="password_medium">Média</string>
+    <string name="password_weak">Fraca</string>
+    <string name="sign_up">Cadastre-se</string>
+    <string name="pls_wait">Por Favor aguarde</string>
+    <string name="checking_data">Verificando dados</string>
+    <string name="c_password">Confirme a senha</string>
+    <string name="error_c_password">As senhas não são iguais</string>
+    <string name="signing_up">Cadastrando novo usuário</string>
+    <string name="pls_wait_while_database">Por favor aguarde enquanto o banco de dados é atualizado</string>
+    <string name="prompt_email">E-mail</string>
+    <string name="error_email_invalid">Esse endereço de E-mail é inválido</string>
+    <string name="error_login_title">Erro</string>
+    <string name="wrong_password">Senha Incorreta</string>
+    <string name="pd_success_title">Sucesso</string>
+    <string name="user_non_exists">Este usuário não existe, deseja cria-lo?</string>
+    <string name="create_new_user_dlgbutton">Criar agora</string>
+    <string name="return_new_user_dlgbutton">Não, retornar</string>
+    <string name="new_user_success">Usuário criado com sucesso</string>
+    <string name="error_user_exists">Esse Usuário já existe</string>
+    <string name="error_email_exists">Esse e-mail já está vinculado em outra conta</string>
+
+    <string name="title_activity_user">Página Inicial</string>
+    <string name="drawer_messages">Mensagens</string>
+    <string name="home">Início</string>
+    <string name="account_section">Opções da conta</string>
+
+    <string name="confirm_ald_title">Você quer mesmo sair?</string>
+    <string name="yes">Sim</string>
+    <string name="no">Não</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="title_activity_settings">Configurações</string>
+
+    <string name="pref_field_title">Preencher campo de login automaticamente</string>
+    <string name="pref_filed_summary">Se essa opção estiver ativada, quando você criar um novo usuário e retornar
+    para a página de login, o campo de login será automaticamente preenchido</string>
+
+    <string name="new_new">Novo</string>
+    <string name="fab_new_post">Postagem Pública</string>
+    <string name="publish">Postar Agora!</string>
+    <string name="post_error">Não é permitido usar uma aspa sozinha</string>
+    <string name="error_post_null">O que você está querendo postar?</string>
+    <string name="fab_new_message">Mensagem</string>
+    <string name="logout">Sair</string>
+
+    <string-array name="pref_example_list_titles">
+        <item>Usuário</item>
+        <item>E-mail</item>
+        <item>Nenhum</item>
+    </string-array>
+    <string-array name="pref_example_list_values">
+        <item>2</item>
+        <item>1</item>
+        <item>0</item>
+    </string-array>
+
+    <string-array name="tab_title">
+        <item>Nova Postagem</item>
+        <item>Mensagens</item>
+    </string-array>
+
+    <string name="edt_mhint">Send a message</string>
+    <string name="post_hint">No que você está pensando?</string>
+    <string name="dlg_load_users_title">Carregando Usuários Disponíveis</string>
+    <string name="check_net">Por favor, verifique sua conexão à internet</string>
+    <string name="pick_up">Escolha Algum:</string>
+    <string name="load_posts">Carregando Postagens</string>
+    <string name="posts">Postagens</string>
+    <string name="sending">Enviando</string>
+    <string name="msg_empty">Porque você quer enviar uma mensagem vazia?</string>
+    <string name="get_messages">Obtendo Mensagens</string>
+    <string name="pref_update_title">Verificar por atualizações</string>
+    <string name="fastconfig_item_title">Configurações Rápidas</string>
+    <string name="update_av_title">Yeah, uma nova atualização está disponível</string>
+    <string name="update_av_msg">Você quer baixa-lá?\n\n</string>
+    <string name="dlg_this_ver">Essa versão:</string>
+    <string name="dlg_new_ver">\nNova versão:</string>
+    <string name="not_now">Agora não</string>
+    <string name="ofcourse">Claro que Sim!</string>
+    <string name="no_updates">Sem Atualizações</string>
+    <string name="verifying">Verificando</string>
+
+    <string name="primary_color_pref">Cor Primária</string>
+    <string name="primary_color_summ">Escolha a cor primária da Aplicação</string>
+
+    <string name="preferences">Preferencias</string>
+    <string name="app_colors">Cores do App</string>
+    <string name="accent_color_pref">Cor de destaque</string>
+    <string name="accent_color_summ">Escolha a cor de destaque do app</string>
+
+</resources>
