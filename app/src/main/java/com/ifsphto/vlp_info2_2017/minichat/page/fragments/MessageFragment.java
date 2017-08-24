@@ -22,7 +22,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
-import com.ifsphto.vlp_info2_2017.minichat.MainActivity;
+import com.ifsphto.vlp_info2_2017.minichat.LoginActivity;
 import com.ifsphto.vlp_info2_2017.minichat.R;
 import com.ifsphto.vlp_info2_2017.minichat.connection.ConnectionClass;
 import com.ifsphto.vlp_info2_2017.minichat.page.ChatActivity;
@@ -131,7 +131,7 @@ public class MessageFragment extends Fragment {
                         rs.next();
                     }
 
-                    SharedPreferences prefs = getActivity().getSharedPreferences(MainActivity.LOGIN_PREFS,
+                    SharedPreferences prefs = getActivity().getSharedPreferences(LoginActivity.LOGIN_PREFS,
                             Context.MODE_PRIVATE);
 
                     adpUsers.remove(prefs.getString("name", null));

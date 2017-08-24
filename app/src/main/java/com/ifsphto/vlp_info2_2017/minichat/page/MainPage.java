@@ -31,14 +31,16 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.ifsphto.vlp_info2_2017.minichat.MainActivity;
+import com.ifsphto.vlp_info2_2017.minichat.LoginActivity;
 import com.ifsphto.vlp_info2_2017.minichat.R;
 import com.ifsphto.vlp_info2_2017.minichat.connection.ConnectionClass;
 import com.ifsphto.vlp_info2_2017.minichat.connection.DownloadService;
-import com.ifsphto.vlp_info2_2017.minichat.connection.UpdateConnection;
 import com.ifsphto.vlp_info2_2017.minichat.object.Post;
-import com.ifsphto.vlp_info2_2017.minichat.page.adapters.MyBaseAdapter;
+import com.ifsphto.vlp_info2_2017.minichat.page.adapters.PostsAdapter;
 import com.ifsphto.vlp_info2_2017.minichat.settings.SettingsActivity;
+
+import org.apache.commons.net.ftp.FTP;
+import org.apache.commons.net.ftp.FTPClient;
 
 /**
  * Essa classe é, por enquanto a maior do projeto, ela é a pagina inicial
@@ -68,7 +70,7 @@ public class MainPage extends AppCompatActivity
     // Listas e Adapters
     private List<Post> posts;
     private ListView mPosts;
-    private MyBaseAdapter adp_posts;
+    private PostsAdapter adp_posts;
 
     // Conexão
     private ConnectionClass connectionClass = new ConnectionClass();
@@ -91,7 +93,7 @@ public class MainPage extends AppCompatActivity
         mPosts = (ListView) findViewById(R.id.posts);
 
         // Recupera o arquivo SharedPreferences
-        prefs = getSharedPreferences(MainActivity.LOGIN_PREFS, MODE_PRIVATE);
+        prefs = getSharedPreferences(LoginActivity.LOGIN_PREFS, MODE_PRIVATE);
 
         // Cria e seta os atributos do Dialogo
         pd = new ProgressDialog(this);
@@ -139,7 +141,7 @@ public class MainPage extends AppCompatActivity
         TextView userEmail = headerView.findViewById(R.id.UserEmail);
 
         // Obtém o Adapter dos Posts
-        adp_posts = new MyBaseAdapter(posts, this, R.layout.post_item);
+        adp_posts = new PostsAdapter(posts, this, R.layout.post_item);
 
         // Recupera os Posts
         GetPosts getPosts = new GetPosts();
@@ -203,6 +205,7 @@ public class MainPage extends AppCompatActivity
                 verifyUpdate();
                 break;
             case R.id.drawer_preferences:
+                // Inicia a tela de configurações
                 startActivityForResult(new Intent(this, SettingsActivity.class), 100);
                 break;
         }
@@ -216,15 +219,16 @@ public class MainPage extends AppCompatActivity
     public void verifyUpdate() {
 
         // Seta e mostra dialogo 'verificando por atualizações'
-        upda = new ProgressDialog(this);
+        /*upda = new ProgressDialog(this);
         upda.setMessage(getString(R.string.verifying));
         upda.setCancelable(false);
         upda.incrementProgressBy(ProgressDialog.STYLE_SPINNER);
-        upda.show();
+        upda.show();*/
 
-        // Executa a classe update
-        Update up = new Update();
-        up.execute("");
+        // TODO: 23/08/2017 Executar verificação de versão, e perguntar ao usuário sobre a atualização
+
+        Intent it = new Intent(this, DownloadService.class);
+        startService(it);
     }
 
     // Desloga o usuário
@@ -239,8 +243,8 @@ public class MainPage extends AppCompatActivity
             @Override
             public void onClick(DialogInterface dialog, int which) {
 
-                // Cria um Intent para a Activity MainActivity
-                final Intent it = new Intent(MainPage.this, MainActivity.class);
+                // Cria um Intent para a Activity LoginActivity
+                final Intent it = new Intent(MainPage.this, LoginActivity.class);
 
                 // Cria um editor para o arquivo SharedPreferences
                 final SharedPreferences.Editor ed = prefs.edit();
@@ -290,7 +294,7 @@ public class MainPage extends AppCompatActivity
 
             // Limpa a lista, redefine o Adapter, mostra dialogo "obtendo posts" e os recupera
             posts.clear();
-            adp_posts = new MyBaseAdapter(posts, this, R.layout.post_item);
+            adp_posts = new PostsAdapter(posts, this, R.layout.post_item);
             pd.show();
             GetPosts getPosts = new GetPosts();
             getPosts.execute("");
@@ -372,98 +376,4 @@ public class MainPage extends AppCompatActivity
             return z;
         }
     }
-
-    private class Update extends AsyncTask<String,String,String> {
-
-        String z = "";
-        ResultSet rs;
-        boolean isSuccess = false;
-
-        AlertDialog.Builder dlg;
-        AlertDialog.Builder down;
-        Connection con;
-        Statement stmt;
-
-        @Override
-        protected void onPostExecute(String s) {
-
-            if (isSuccess) {
-
-                try {
-
-                    rs.first();
-                    int ver = rs.getInt(1);
-
-                    PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
-                    int verCode = pInfo.versionCode;
-
-                    if (ver > verCode) {
-
-                        upda.dismiss();
-
-                        dlg = new AlertDialog.Builder(MainPage.this);
-
-                        dlg.setTitle(getString(R.string.update_av_title))
-                                .setMessage(getString(R.string.update_av_msg)
-                                        + getString(R.string.dlg_this_ver) + " " + pInfo.versionName +
-                                        getString(R.string.dlg_new_ver) + " " + rs.getString(2))
-                                .setNeutralButton(getString(R.string.not_now), null)
-                                .setPositiveButton(getString(R.string.ofcourse), new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-
-                                        Intent down = new Intent(MainPage.this, DownloadService.class);
-                                        startService(down);
-
-                                    }
-                                }).show();
-
-                    } else {
-                        upda.dismiss();
-                        Toast.makeText(MainPage.this, R.string.no_updates, Toast.LENGTH_LONG).show();
-                    }
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    upda.dismiss();
-                    dlg.show();
-                } finally {
-                    upda = null;
-                    dlg = null;
-                    rs = null;
-                    stmt = null;
-                    con = null;
-                    down = null;
-                }
-            } else
-                Toast.makeText(MainPage.this, "ERRRROU", Toast.LENGTH_LONG).show();
-        }
-
-        @Override
-        protected String doInBackground(String... params) {
-
-            dlg = new AlertDialog.Builder(MainPage.this);
-            dlg.setNeutralButton("OK", null);
-
-            try {
-
-                con = new UpdateConnection().conn();
-
-                if (con == null)
-                    z = connectionClass.getException();
-                else {
-                    stmt = con.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
-                    rs = stmt.executeQuery("SELECT Version_Code,Version FROM att");
-                }
-                isSuccess = rs.next();
-
-            } catch (Exception ex) {
-                upda.dismiss();
-                z = ex.getMessage();
-                ex.printStackTrace();
-            }
-            return z;
-        }
-    }
-
 }

@@ -25,18 +25,18 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".MainActivity"
+            android:name=".LoginActivity"
             android:label="@string/title_activity_main"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".NewUserActivity"
-            android:label="@string/title_new_user_act"
-            android:parentActivityName=".MainActivity"
+            android:name=".RegistrationActivity"
+            android:label="@string/title_register_act"
+            android:parentActivityName=".LoginActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.ifsphto.vlp_info2_2017.minichat.MainActivity" />
+                android:value="com.ifsphto.vlp_info2_2017.minichat.LoginActivity" />
         </activity>
         <activity
             android:name=".page.MainPage"
@@ -62,6 +62,11 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.ifsphto.vlp_info2_2017.minichat.page.SharingActivity" />
         </activity>
+
+        <service
+            android:name=".connection.DownloadService"
+            android:enabled="true" />
+
     </application>
 
 </manifest>

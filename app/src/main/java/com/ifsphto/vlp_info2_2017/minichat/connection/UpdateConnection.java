@@ -25,6 +25,8 @@ public class UpdateConnection {
      *
      * A arquitetura dessa classe é igual as outras.
      * @see ConnectionClass para mais detalhes
+     *
+     * @deprecated DownloadService quase funfando
      */
 
     private String exception;

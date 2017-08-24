@@ -3,21 +3,22 @@ package com.ifsphto.vlp_info2_2017.minichat.splash;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.View;
 
-import com.ifsphto.vlp_info2_2017.minichat.MainActivity;
+import com.ifsphto.vlp_info2_2017.minichat.LoginActivity;
 import com.ifsphto.vlp_info2_2017.minichat.R;
 import com.ifsphto.vlp_info2_2017.minichat.page.MainPage;
 
 /**
- * Created by vinibrenobr11 on 03/03/2017 at 00:54
+ * Created by
+ * @author vinibrenobr11 on 03/03/2017 at 00:54
  *
  * Essa Classe que tem a função de gerenciar e exibir tela
  * de "Splash", ou de apresentação no início da execução
  * do app, ultilizando uma interface @{@link Runnable}
- *
- * @author vinibrenobr11 on 15/08/2017 at 19:28
  */
 public class Splash extends Activity implements Runnable {
 
@@ -29,23 +30,26 @@ public class Splash extends Activity implements Runnable {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.splash);
 
-        // TODO 14/08/2017: Icónes pretos na barra de navegação para Android O
+        // Deixa os ícones da barra de navegação pretos para Android Oreo ou superior
+        if (Build.VERSION.SDK_INT >= 26) {
+            int flags = getWindow().getDecorView().getSystemUiVisibility();
+            flags |= View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+            getWindow().getDecorView().setSystemUiVisibility(flags);
+        }
 
         /*
         * Cria um SharedPreferences, e verifica se o usuário está
         * com login ativo ou não, e este valor é repassado a um boolean
         */
-        SharedPreferences prefs = getSharedPreferences(MainActivity.LOGIN_PREFS, MODE_PRIVATE);
+        SharedPreferences prefs = getSharedPreferences(LoginActivity.LOGIN_PREFS, MODE_PRIVATE);
         boolean isLogged = prefs.getBoolean(MainPage.PREF_LOG, false);
 
-        // Se o usuário já estiver logado, o app se inicia na "Tela inicial"
-        // Onde ele verá os posts de outros usuários
-
-        // Se não, o app iniciará na tela para ele fazer o login
-        if(isLogged)
-            it = new Intent(this, MainPage.class);
-        else
-            it = new Intent(this, MainActivity.class);
+        /*
+         * Se o usuário já estiver logado, o app se inicia na "Tela inicial"
+         * Onde ele verá os posts de outros usuários
+         * Se não, o app iniciará na tela para ele fazer o login
+         */
+        it = isLogged? new Intent(this, MainPage.class) : new Intent(this, LoginActivity.class);
 
         // Espera 3 sec para executar o método run()
         // e ir para a próxima tela
@@ -53,7 +57,7 @@ public class Splash extends Activity implements Runnable {
         handler.postDelayed(this, 3000);
     }
 
-    // Método padrão da interface Runnable
+    // Método da interface Runnable que inicia a Activity especificada
     @Override
     public void run() {
         startActivity(it);

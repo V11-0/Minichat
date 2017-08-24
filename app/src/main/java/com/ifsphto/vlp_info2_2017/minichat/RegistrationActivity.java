@@ -13,8 +13,6 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -27,11 +25,11 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
-public class NewUserActivity extends AppCompatActivity {
+public class RegistrationActivity extends AppCompatActivity {
 
     /**
      * Essa classe é bem parecida com a
-     * @see MainActivity, com um layout bem parecido
+     * @see LoginActivity , com um layout bem parecido
      */
 
     // Campos de texto, suas string e botão para fazer cadastro
@@ -158,7 +156,7 @@ public class NewUserActivity extends AppCompatActivity {
 
     /**
      * Mesma coisa que a
-     * @see MainActivity, só que com mais campos
+     * @see LoginActivity , só que com mais campos
      */
     private void createNewUser() {
 
@@ -268,7 +266,7 @@ public class NewUserActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String r) {
 
-            AlertDialog.Builder ad = new AlertDialog.Builder(NewUserActivity.this);
+            AlertDialog.Builder ad = new AlertDialog.Builder(RegistrationActivity.this);
             if(r.length() < 40)
                 ad.setTitle(r);
             else
@@ -299,7 +297,7 @@ public class NewUserActivity extends AppCompatActivity {
                             default:
                                 Log.v("Option is Disabled", "Field will stay empty");
                         }
-                        setResult(MainActivity.REQUEST_CODE_NEW_USER, it);
+                        setResult(LoginActivity.REQUEST_CODE_NEW_USER, it);
                         finish();
                     }
                 });

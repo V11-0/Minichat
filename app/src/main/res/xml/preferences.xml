@@ -15,12 +15,14 @@
 
         <com.flask.colorpicker.ColorPickerPreference
             android:key="PrimaryColor"
+            android:defaultValue="#3F51B5"
             android:title="@string/primary_color_pref"
             android:summary="@string/primary_color_summ"
             app:lightnessSlider="true" />
 
         <com.flask.colorpicker.ColorPickerPreference
             android:key="AccentColor"
+            android:defaultValue="#FF4081"
             android:title="@string/accent_color_pref"
             android:summary="@string/accent_color_summ"
             app:lightnessSlider="true" />

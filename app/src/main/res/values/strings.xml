@@ -1,12 +1,12 @@
 <resources>
-    <string name="app_name">Minichat</string>
+    <string name="app_name" translatable="false">Minichat</string>
     <string name="title_activity_main">Sign in</string>
     <string name="help_textview">To create a User for you, please, go to the 3 dots to the top-right of your screen.</string>
     <string name="err_no_network">You aren\'t connect to any Wi-Fi network</string>
     <string name="err_no_net_action">Connect</string>
     <string name="connected">Connected!</string>
     <string name="no_connection">No connection, the App will not work without internet access</string>
-    <string name="title_new_user_act">Add New User</string>
+    <string name="title_register_act">Create New User</string>
     <string name="prompt_login">User name or Email</string>
     <string name="prompt_user">User name</string>
     <string name="prompt_password">Password</string>
@@ -110,5 +110,8 @@
     <string name="app_colors">Application Colors</string>
     <string name="accent_color_pref">Accent Color</string>
     <string name="accent_color_summ">Choose the Accent color in the App</string>
+    <string name="updating">Updating</string>
+    <string name="downloading">Downloading Update File</string>
+    <string name="down_success">File Downloaded</string>
 
 </resources>

@@ -32,7 +32,7 @@ import java.sql.Statement;
 /**
  * Primeira tela do App, onde o usuário irá fazer um Login
  */
-public class MainActivity extends AppCompatActivity {
+public class LoginActivity extends AppCompatActivity {
 
     // Dados identificadores de campos do SharedPreferences
     public static final String LOGIN_PREFS = "LoginInfo";
@@ -168,7 +168,7 @@ public class MainActivity extends AppCompatActivity {
         switch (item.getItemId()) {
 
             case R.id.menu_new_user:
-                Intent it = new Intent(this, NewUserActivity.class);
+                Intent it = new Intent(this, RegistrationActivity.class);
                 startActivityForResult(it, REQUEST_CODE_NEW_USER); // Não coloca o finish aqui, já ta certo
                 break;
             case R.id.stg_Item:
@@ -183,7 +183,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Se tudo ocorrer bem a tela inicial será carregada
 
-        Intent it = new Intent(MainActivity.this, MainPage.class);
+        Intent it = new Intent(LoginActivity.this, MainPage.class);
 
         dlg.dismiss();
 
@@ -209,9 +209,8 @@ public class MainActivity extends AppCompatActivity {
             edt_login.setText(data.getStringExtra("result"));
             edt_password.setText("");
         }
-
         // Verifica se o usuário voltou das configurações de Wi-fi
-        if (resultCode == 0) {
+        else if (resultCode == 0) {
             // Verifica como está a rede e exibe um alerta se ele está agora conectado ou não
             ConnectivityManager connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
             NetworkInfo mwifi = connManager.getActiveNetworkInfo();
@@ -230,7 +229,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String r) {
 
-            AlertDialog.Builder al = new AlertDialog.Builder(MainActivity.this);
+            AlertDialog.Builder al = new AlertDialog.Builder(LoginActivity.this);
             al.setIcon(android.R.drawable.ic_dialog_alert);
             al.setTitle(getString(R.string.error_login_title));
             al.setMessage(r);
@@ -239,7 +238,7 @@ public class MainActivity extends AppCompatActivity {
                 al.setPositiveButton(getString(R.string.create_new_user_dlgbutton), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        Intent it = new Intent(MainActivity.this, NewUserActivity.class);
+                        Intent it = new Intent(LoginActivity.this, RegistrationActivity.class);
                         it.putExtra("login", user_or_email);
                         startActivityForResult(it, REQUEST_CODE_NEW_USER);
                     }

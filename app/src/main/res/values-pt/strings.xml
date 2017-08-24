@@ -5,7 +5,7 @@
     <string name="err_no_net_action">Conectar</string>
     <string name="connected">Conectado!</string>
     <string name="no_connection">Sem conexão, o App não funcionará sem uma conexão à internet</string>
-    <string name="title_new_user_act">Cadastrar Novo Usuário</string>
+    <string name="title_register_act">Cadastrar Novo Usuário</string>
     <string name="prompt_login">Nome de usuário ou E-mail</string>
     <string name="prompt_user">Nome de usuário</string>
     <string name="prompt_password">Senha</string>
@@ -81,7 +81,7 @@
         <item>Mensagens</item>
     </string-array>
 
-    <string name="edt_mhint">Send a message</string>
+    <string name="edt_mhint">Envie uma Mensagem</string>
     <string name="post_hint">No que você está pensando?</string>
     <string name="dlg_load_users_title">Carregando Usuários Disponíveis</string>
     <string name="check_net">Por favor, verifique sua conexão à internet</string>
@@ -109,5 +109,7 @@
     <string name="app_colors">Cores do App</string>
     <string name="accent_color_pref">Cor de destaque</string>
     <string name="accent_color_summ">Escolha a cor de destaque do app</string>
+    <string name="down_success">Arquivo Baixado</string>
+    <string name="downloading">Baixando Arquivo de Atualização</string>
 
 </resources>

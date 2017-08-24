@@ -20,7 +20,7 @@ import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
-import com.ifsphto.vlp_info2_2017.minichat.MainActivity;
+import com.ifsphto.vlp_info2_2017.minichat.LoginActivity;
 import com.ifsphto.vlp_info2_2017.minichat.R;
 import com.ifsphto.vlp_info2_2017.minichat.connection.ConnectionClass;
 
@@ -42,7 +42,7 @@ public class PostFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
 
         // Arquivo com as preferencias do Usuário
-        prefs = getActivity().getSharedPreferences(MainActivity.LOGIN_PREFS, Context.MODE_PRIVATE);
+        prefs = getActivity().getSharedPreferences(LoginActivity.LOGIN_PREFS, Context.MODE_PRIVATE);
 
         // Botão para realizar o post, e campo para digitar
         Button btn_post = getActivity().findViewById(R.id.btn_post);

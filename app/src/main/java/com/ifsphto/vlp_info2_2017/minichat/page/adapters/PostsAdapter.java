@@ -15,7 +15,7 @@ import com.ifsphto.vlp_info2_2017.minichat.object.Post;
 /**
  * Created by vinibrenobr11 on 21/03/2017 at 21:39
  */
-public class MyBaseAdapter extends BaseAdapter {
+public class PostsAdapter extends BaseAdapter {
 
     /**
      * Essa Classe personaliza o layout do
@@ -38,7 +38,7 @@ public class MyBaseAdapter extends BaseAdapter {
      * @param layout onde diz qual layout será usado para criar
      *               a ListView personalizada
      */
-    public MyBaseAdapter(List<Post> post, Activity act, int layout) {
+    public PostsAdapter(List<Post> post, Activity act, int layout) {
         this.post = post;
         this.act = act;
         this.layout = layout;

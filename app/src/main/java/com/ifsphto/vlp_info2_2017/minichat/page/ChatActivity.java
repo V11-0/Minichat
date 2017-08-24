@@ -19,7 +19,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
-import com.ifsphto.vlp_info2_2017.minichat.MainActivity;
+import com.ifsphto.vlp_info2_2017.minichat.LoginActivity;
 import com.ifsphto.vlp_info2_2017.minichat.R;
 import com.ifsphto.vlp_info2_2017.minichat.connection.MessagesConnection;
 import com.ifsphto.vlp_info2_2017.minichat.object.Message;
@@ -67,7 +67,7 @@ public class ChatActivity extends AppCompatActivity {
         setContentView(R.layout.activity_chat);
 
         // SharedPreferences aqui é criada, para posteriormente recuperar o nome do usuário atual
-        SharedPreferences prefs = getSharedPreferences(MainActivity.LOGIN_PREFS, MODE_PRIVATE);
+        SharedPreferences prefs = getSharedPreferences(LoginActivity.LOGIN_PREFS, MODE_PRIVATE);
 
         messages_view = (ListView) findViewById(R.id.messages_view);
 
