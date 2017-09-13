@@ -2,10 +2,13 @@ package com.ifsphto.vlp_info2_2017.minichat.connection;
 
 import android.app.IntentService;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.TaskStackBuilder;
 
 import com.ifsphto.vlp_info2_2017.minichat.R;
 
@@ -57,7 +60,7 @@ public class DownloadService extends IntentService {
 
                 FTPClient ftp = null;
                 OutputStream out = null;
-                boolean success = false;
+                boolean success;
 
                 try {
 
@@ -76,7 +79,7 @@ public class DownloadService extends IntentService {
                     ftp.enterLocalPassiveMode();
 
                     // Define o arquivo e onde ele será salvo
-                    File file = new File(getFilesDir(), "app.apk");
+                    File file = new File(getExternalCacheDir(), "app.apk");
                     // Cria um buffer para escrever os dados
                     out = new BufferedOutputStream(new FileOutputStream(file));
 
@@ -106,13 +109,24 @@ public class DownloadService extends IntentService {
 
                     // Se tudo ocorreu bem, a notificação diz que o arquivo foi baixado
                     if (success) {
+                        mProgress.interrupt();
+
+                        Intent promptInstall = new Intent(Intent.ACTION_VIEW);
+                        promptInstall.setDataAndType(Uri.fromFile(file),
+                                "application/vnd.android.package-archive");
+
+                        TaskStackBuilder mTask = TaskStackBuilder.create(getBaseContext());
+                        mTask.addNextIntent(promptInstall);
+
+                        PendingIntent resultIntent = mTask.getPendingIntent(0,
+                                PendingIntent.FLAG_UPDATE_CURRENT);
+
                         mBuilder.setContentText("").setContentTitle(getString(R.string.down_success))
                                 .setProgress(0, 0, false)
-                                .setSmallIcon(android.R.drawable.stat_sys_download_done);
+                                .setSmallIcon(android.R.drawable.stat_sys_download_done)
+                                .setContentIntent(resultIntent);
 
                         mNotifierManager.notify(0, mBuilder.build());
-
-                        // TODO: 23/08/2017 Exibir tela para instalação
                     }
 
                 }catch (Exception e) {
