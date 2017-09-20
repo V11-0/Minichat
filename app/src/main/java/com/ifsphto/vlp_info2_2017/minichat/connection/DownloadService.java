@@ -6,6 +6,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
@@ -109,8 +110,10 @@ public class DownloadService extends IntentService {
 
                     // Se tudo ocorreu bem, a notificação diz que o arquivo foi baixado
                     if (success) {
+
                         mProgress.interrupt();
 
+                        // Não funcionando para SDK >= 25
                         Intent promptInstall = new Intent(Intent.ACTION_VIEW);
                         promptInstall.setDataAndType(Uri.fromFile(file),
                                 "application/vnd.android.package-archive");
