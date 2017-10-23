@@ -6,7 +6,6 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
@@ -21,13 +20,13 @@ import java.sql.Statement;
 
 import com.ifsphto.vlp_info2_2017.minichat.LoginActivity;
 import com.ifsphto.vlp_info2_2017.minichat.R;
-import com.ifsphto.vlp_info2_2017.minichat.connection.MessagesConnection;
+import com.ifsphto.vlp_info2_2017.minichat.connection.ConnectionClass;
 import com.ifsphto.vlp_info2_2017.minichat.object.Message;
 import com.ifsphto.vlp_info2_2017.minichat.page.adapters.MessagesAdapter;
 
 /**
- * Classe da tela de conversa, onde é possível enviar e
- * receber mensagens enviadas diretamente a outro usuário
+ * Classe da tela de conversa, onde é possível enviar e receber mensagens enviadas diretamente
+ * a outro usuário
  */
 public class ChatActivity extends AppCompatActivity {
 
@@ -38,11 +37,11 @@ public class ChatActivity extends AppCompatActivity {
     private MessagesAdapter ma;
 
     // Strings dizendo qual o nome dos usuários desta conversa
-    private static String thisUser;
+    private static String otherUser;
     private static String hereUser;
 
     // Cria a classe que fará a conexão ao banco mensagens
-    private MessagesConnection connectionClass = new MessagesConnection();
+    private ConnectionClass connectionClass = new ConnectionClass();
     private Connection con = null;
 
     // Mensagem
@@ -69,10 +68,10 @@ public class ChatActivity extends AppCompatActivity {
         // SharedPreferences aqui é criada, para posteriormente recuperar o nome do usuário atual
         SharedPreferences prefs = getSharedPreferences(LoginActivity.LOGIN_PREFS, MODE_PRIVATE);
 
-        messages_view = (ListView) findViewById(R.id.messages_view);
+        messages_view = findViewById(R.id.messages_view);
 
         // Obtém o nome dos dois usuários desta conversa
-        thisUser = getIntent().getStringExtra("SelectedName");
+        otherUser = getIntent().getStringExtra("SelectedName");
         hereUser = prefs.getString("name", null);
 
         /*
@@ -87,21 +86,23 @@ public class ChatActivity extends AppCompatActivity {
 
          PS: tudo em minúsculo, toLowerCase() faz isso
           */
-        if (hereUser.compareToIgnoreCase(thisUser) < 0)
-            table = (hereUser + thisUser).toLowerCase();
+        assert hereUser != null;
+        if (hereUser.compareToIgnoreCase(otherUser) < 0)
+            table = (hereUser + otherUser).toLowerCase();
         else
-            table = (thisUser + hereUser).toLowerCase();
+            table = (otherUser + hereUser).toLowerCase();
 
         // Criará e setará o nome da pessoa com quem o usuário está conversando na barra superior
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_chat);
-        toolbar.setTitle(thisUser);
+        Toolbar toolbar = findViewById(R.id.toolbar_chat);
+        toolbar.setTitle(otherUser);
 
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if (getSupportActionBar() != null)
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         // Recupera campo para digitar a mensagem, e o botão para envia-lás
-        send_message = (EditText)findViewById(R.id.send_message);
-        FloatingActionButton fab = (FloatingActionButton)findViewById(R.id.fab_send_message);
+        send_message = findViewById(R.id.send_message);
+        FloatingActionButton fab = findViewById(R.id.fab_send_message);
 
         // Coloca os atributos do dialogo para indicar q a mensagem está sendo enviada
         smpd = new ProgressDialog(this);
@@ -128,6 +129,9 @@ public class ChatActivity extends AppCompatActivity {
         loadMessages();
     }
 
+    /**
+     * Envia a mensagem pro MySQL
+     */
     private void sendMessage() {
 
         // Recupera a mensagem digitada
@@ -137,10 +141,9 @@ public class ChatActivity extends AppCompatActivity {
         if (TextUtils.isEmpty(message))
             Toast.makeText(this, R.string.msg_empty,
                     Toast.LENGTH_LONG).show();
-        else if (message.contains("'"))
-            Snackbar.make(messages_view, getString(R.string.post_error),
-                    Snackbar.LENGTH_LONG).show();
         else {
+
+            message = message.replace("'", "''");
 
             // Exibe "Enviando mensagem"
             smpd.show();
@@ -157,6 +160,9 @@ public class ChatActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Carrega as mensagens do servidor
+     */
     private void loadMessages() {
 
         // Cria o adaptador
@@ -215,21 +221,20 @@ public class ChatActivity extends AppCompatActivity {
                     String query = "INSERT INTO " + table + " values ('" + hereUser + "', '" + message + "');";
 
                     Statement stmt = con.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
-                    rs = stmt.executeQuery("show tables like '" + table + "'");
+                    rs = stmt.executeQuery("SHOW TABLES LIKE '" + table + "'");
 
                     if (rs.next()) {
                         stmt.execute(query);
                         isSuccess = true;
                     }
                     else {
-                        StringBuilder sb = new StringBuilder();
 
-                        sb.append("CREATE TABLE ").append(table).append(" ( ");
-                        sb.append("Who varchar(200) not null, ");
-                        sb.append("Content varchar(10000) not null ");
-                        sb.append("); ");
+                        String query_new_table = "CREATE TABLE " + table + " ( " +
+                                "Who varchar(200) not null, " +
+                                "Content varchar(10000) not null " +
+                                "); ";
 
-                        stmt.execute(sb.toString());
+                        stmt.execute(query_new_table);
 
                         stmt.execute(query);
                         isSuccess = true;
@@ -264,7 +269,7 @@ public class ChatActivity extends AppCompatActivity {
 
                     do {
 
-                        Message msn = new Message(rs.getString(1).equals(thisUser), rs.getString(2));
+                        Message msn = new Message(rs.getString(1).equals(otherUser), rs.getString(2));
                         ma.add(msn);
 
                     } while (rs.next());
@@ -285,7 +290,7 @@ public class ChatActivity extends AppCompatActivity {
             dlg.setNeutralButton("OK", null);
 
             if (con == null)
-                con = connectionClass.conn();
+                con = connectionClass.conn(true);
 
             try {
 
@@ -295,7 +300,7 @@ public class ChatActivity extends AppCompatActivity {
 
                     Statement stmt = con.createStatement();
 
-                    rs = stmt.executeQuery("show tables like '" + table + "'");
+                    rs = stmt.executeQuery("SHOW TABLES LIKE '" + table + "'");
 
                     if (rs.next()) {
                         rs = stmt.executeQuery("SELECT * FROM " + table);

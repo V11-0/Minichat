@@ -4,8 +4,7 @@ import android.os.Bundle;
 
 
 /**
- * Created by
- * @author vinibrenobr11 on 20/08/2017 at 15:40:36
+ * Created by vinibrenobr11 on 20/08/2017 at 15:40:36<br></br>
  *
  * Esta é a classe de Configurações do app
  * Essa classe funciona carregando Fragments sendo que elas

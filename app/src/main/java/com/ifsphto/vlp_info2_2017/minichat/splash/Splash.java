@@ -13,8 +13,7 @@ import com.ifsphto.vlp_info2_2017.minichat.R;
 import com.ifsphto.vlp_info2_2017.minichat.page.MainPage;
 
 /**
- * Created by
- * @author vinibrenobr11 on 03/03/2017 at 00:54
+ * Created by vinibrenobr11 on 03/03/2017 at 00:54<br></br>
  *
  * Essa Classe que tem a função de gerenciar e exibir tela
  * de "Splash", ou de apresentação no início da execução
@@ -57,7 +56,9 @@ public class Splash extends Activity implements Runnable {
         handler.postDelayed(this, 3000);
     }
 
-    // Método da interface Runnable que inicia a Activity especificada
+    /**
+     * Método da interface Runnable que inicia a Activity especificada
+     */
     @Override
     public void run() {
         startActivity(it);

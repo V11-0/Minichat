@@ -5,52 +5,52 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 /**
- * Created by vinibrenobr11 on 27/04/2017 at 23:01
+ * Created by vinibrenobr11 on 27/04/2017 at 23:01<br></br>
+ *
+ * Eu tive a ideia de colocar um banco de dados SQLite no próprio App, para que a pessoa
+ * tenha acesso as mensagens e Postagens mesmo quando ela estiver off-line como um Whats da vida
+ * Não consegui implementar isso ainda, quando o App começar a funcionar mesmo, a gente implementa
  */
 public class Database extends SQLiteOpenHelper {
 
-    /**
-     * Eu tive a ideia de colocar um banco de dados SQLite no próprio
-     * App, para que a pessoa tenha acesso as mensagens e Postagens
-     * Mesmo quando ela estiver off-line como um Whats da vida
-     *
-     * Não consegui implementar isso ainda, quando o App começar a
-     * funcionar mesmo, a gente implementa isso
-     */
     private String name;
 
     /**
      * Construtor recebendo dois parametros
      *
-     * @param context o contexto da aplicação
-     *                @see Context
-     * @param name nome do banco
+     * @param context o contexto da aplicação.
+     * @param name nome do banco.
      */
     public Database (Context context, String name) {
         super(context, "Mensagens", null, 1);
         this.name = name;
     }
 
+    /**
+     * Cria a uma tabela no banco SQLite
+     * @param db database
+     */
     @Override
     public void onCreate(SQLiteDatabase db) {
 
-        // Esse StringBuilder concatena o script sem desperdiçar muita memória
-        StringBuilder sqlbuilder = new StringBuilder();
-
-        // Script para criar a tabela
-        sqlbuilder.append("CREATE TABLE IF NOT EXISTS ").append(name).append(" ( ");
-        sqlbuilder.append("CONTENT                VARCHAR (5000), ");
-        sqlbuilder.append("WHO                    INT ");
-        sqlbuilder.append("); ");
+        // query para criar tabela
+        String sqlbuilder = "CREATE TABLE IF NOT EXISTS " + name + " ( " +
+                "CONTENT                VARCHAR (5000), " +
+                "WHO                    INT " +
+                "); ";
 
         // Executa o script para criar a tabela
-        db.execSQL(sqlbuilder.toString());
-
+        db.execSQL(sqlbuilder);
     }
 
+    /**
+     * Ultilizado para atualizar o banco
+     * @param db Database
+     * @param oldVersion versão antiga
+     * @param newVersion nova versão
+     */
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
 
     }
 }

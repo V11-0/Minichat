@@ -28,14 +28,10 @@ import com.ifsphto.vlp_info2_2017.minichat.connection.ConnectionClass;
 import com.ifsphto.vlp_info2_2017.minichat.page.ChatActivity;
 
 /**
- * Created by vinibrenobr11 on 15/03/2017 at 11:47
+ * Created by vinibrenobr11 on 15/03/2017 at 11:47<br></br>
  *
  * Esse classe gerenciará a segunda aba da SharingActivity que é a aba de Mensagens
  * Onde por agora há apenas um botão para ver os usuários disponíveis
- *
- * AVISO: A classe
- * ProgressDialog está descontinuada, temos que achar um
- * jeito de substituí-la, mas não precisamos nos preocupar com isso
  */
 public class MessageFragment extends Fragment {
 
@@ -45,13 +41,16 @@ public class MessageFragment extends Fragment {
     private ProgressDialog pdlg;
     private Dialog dlg;
 
-    // Método chamado quando a atividade que vai ter o Fragment é criada
+    /**
+     * Método chamado quando a atividade que vai ter o Fragment é criada
+     * @param savedInstanceState Não sei direito
+     */
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
         // Recupera o botão flutuante do layout
-        FloatingActionButton fab = (FloatingActionButton) getActivity().findViewById(R.id.fab);
+        FloatingActionButton fab = getActivity().findViewById(R.id.fab);
 
         // Cria o ArrayAdapter, passando como parâmetro o Context
         // atual e qual layout será usado nele
@@ -155,12 +154,12 @@ public class MessageFragment extends Fragment {
 
             try {
 
-                con = connectionClass.conn();
+                con = connectionClass.conn(false);
 
                 if (con == null)
                     z = connectionClass.getException();
                 else {
-                    String query = "SELECT UserId FROM Usertbl";
+                    String query = "SELECT Name FROM User";
                     Statement stmt = con.createStatement();
                     rs = stmt.executeQuery(query);
                 }

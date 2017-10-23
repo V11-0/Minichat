@@ -14,8 +14,7 @@ import com.ifsphto.vlp_info2_2017.minichat.page.adapters.MyFragmentPagerAdapter;
 import com.ifsphto.vlp_info2_2017.minichat.settings.SettingsActivity;
 
 /**
- * Essa classe gerencia a tela onde há duas abas
- * aba de Posts e de mensagens
+ * Essa classe gerencia a tela onde há duas abas aba de Posts e de mensagens
  */
 
 public class SharingActivity extends AppCompatActivity {
@@ -25,16 +24,18 @@ public class SharingActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sharing);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_share);
+        Toolbar toolbar = findViewById(R.id.toolbar_share);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        if (getSupportActionBar() != null)
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         // Obtém o que foi passado da outra atividade para essa
         Bundle bundle = getIntent().getExtras();
 
         // O Layout e o gerenciador das abas são recuperados
-        TabLayout mTabLayout = (TabLayout) findViewById(R.id.tabs);
-        ViewPager mViewPager = (ViewPager) findViewById(R.id.container);
+        TabLayout mTabLayout = findViewById(R.id.tabs);
+        ViewPager mViewPager = findViewById(R.id.container);
 
         mViewPager.setAdapter(new MyFragmentPagerAdapter(getSupportFragmentManager(),
                 getResources().getStringArray(R.array.tab_title)));

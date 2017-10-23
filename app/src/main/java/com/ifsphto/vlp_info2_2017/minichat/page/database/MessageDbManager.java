@@ -4,16 +4,12 @@ import android.content.ContentValues;
 import android.database.sqlite.SQLiteDatabase;
 
 /**
- * Created by vinibrenobr11 on 27/04/2017 at 23:55
+ * Created by vinibrenobr11 on 27/04/2017 at 23:55<br></br>
+ *
+ * Essea classe é a classe que usaremos para gerenciar o banco de dados SQLite local, por enquanto
+ * ela não está sendo usada
  */
 public class MessageDbManager {
-
-    /**
-     * Essea classe é a classe que usaremos para gerenciar
-     * o banco de dados SQLite local, por enquanto ela não está
-     * sendo usada
-     * @see Database
-     */
 
     // Conexão do banco
     private SQLiteDatabase conn;
@@ -28,15 +24,12 @@ public class MessageDbManager {
     }
 
     /**
-     * Um objeto do tipo
-     * @see ContentValues é necessário para
-     * conseguirmos adicionar dados no banco SQLite.
+     * Um objeto do tipo {@link ContentValues} é necessário para conseguirmos adicionar dados
+     * no banco SQLite. Esse método preenche o ContentValues e o retorna
      *
-     * Esse método preenche o ContentValues e o
-     * retorna
-     *
-     * @param content é o conteúdo da mensagem
-     * @param who é o autor da mensagem
+     * @param content Conteúdo da mensagem.
+     * @param who Autor da mensagem.
+     * @return CV para executar no banco.
      */
     private ContentValues fillCV(String content, int who) {
 

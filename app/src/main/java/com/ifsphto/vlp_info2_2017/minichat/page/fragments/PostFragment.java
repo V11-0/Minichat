@@ -14,9 +14,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import java.sql.Connection;
-import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
@@ -25,10 +25,10 @@ import com.ifsphto.vlp_info2_2017.minichat.R;
 import com.ifsphto.vlp_info2_2017.minichat.connection.ConnectionClass;
 
 /**
- * Created by vinibrenobr11 on 15/03/2017 at 11:48
+ * Created by vinibrenobr11 on 15/03/2017 at 11:48<br></br>
  *
- * Essa classe gerencia a aba 1 da tela de SharingActivity,
- * Ela, basicamente, pega o texto do EditText e Insere no MySQL
+ * Essa classe gerencia a aba 1 da tela de SharingActivity, Ela, basicamente
+ * pega o texto do EditText e Insere no MySQL
  */
 public class PostFragment extends Fragment {
 
@@ -37,6 +37,10 @@ public class PostFragment extends Fragment {
     private SharedPreferences prefs;
     private String content;
 
+    /**
+     * Executado quando a activity onde está o Fragment é iniciada
+     * @param savedInstanceState Não sei direito
+     */
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
@@ -58,31 +62,38 @@ public class PostFragment extends Fragment {
                 // Verifica se o que o usuario digitou está vazio
                 if (TextUtils.isEmpty(content))
                     Snackbar.make(getView(), getString(R.string.error_post_null), Snackbar.LENGTH_LONG).show();
-                // Aqui é verificado se o que o usuário digitou contém aspas simples ''
-                // pois o MySQL não as suporta
-                else if (content.contains("'"))
-                    Snackbar.make(getView(), getString(R.string.post_error), Snackbar.LENGTH_LONG).show();
                 else {
 
+                    prog(true);
                     // Executa a classe para enviar o post
                     SetPost setPost = new SetPost();
                     setPost.execute("");
-
-                    /*
-                    Aqui a atividade é obtida, no caso, SharingActivity, e a termina com
-                    um código de resultado 52
-                     */
-                    getActivity().setResult(52);
-                    getActivity().finish();
                 }
             }
         });
     }
 
+    /**
+     * Deixa o layout de forma a indicar progresso, removendo os campos de texto e
+     * deixando apenas o espiral de progresso
+     *
+     * @param show true, para exibir o progresso, 0 para exibir o layout normalmente
+     */
+    private void prog(boolean show) {
+
+        if (show) {
+            getActivity().findViewById(R.id.post_prog).setVisibility(View.VISIBLE);
+            getActivity().findViewById(R.id.linear_post).setVisibility(View.GONE);
+        } else {
+            getActivity().findViewById(R.id.post_prog).setVisibility(View.GONE);
+            getActivity().findViewById(R.id.linear_post).setVisibility(View.VISIBLE);
+        }
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.new_post_layout, container, false);
+        return inflater.inflate(R.layout.fragment_post, container, false);
     }
 
     private class SetPost extends AsyncTask<String,String,String> {
@@ -96,25 +107,36 @@ public class PostFragment extends Fragment {
             try {
                 ConnectionClass connectionClass = new ConnectionClass();
 
-                Connection con = connectionClass.conn();
+                Connection con = connectionClass.conn(false);
 
                 if (con == null)
-                    dlg_error.setMessage(connectionClass.getException()).show();
+                    dlg_error.setMessage(connectionClass.getException()).create().show();
                 else {
 
-                    SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+                    content = content.replace("'", "''");
+
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                     Calendar calendar = Calendar.getInstance();
 
-                    String query = "INSERT INTO Poststbl VALUES ('" + prefs.getString("name", "404") +
+                    String query = "INSERT INTO Post VALUES ('" + prefs
+                            .getInt("id", Integer.MIN_VALUE) +
                             "', '" + content + "', '" +  sdf.format(calendar.getTime()) + "')";
-                    Statement stmt = con.createStatement();
-                    stmt.execute(query);
+
+                    con.createStatement().execute(query);
                     con.close();
+
+                    /*
+                    Aqui a atividade é obtida, no caso, SharingActivity, e a termina com
+                    um código de resultado 52
+                     */
+                    getActivity().setResult(52);
+                    getActivity().finish();
                 }
 
             } catch (Exception ex) {
-                dlg_error.setMessage(ex.getMessage()).show();
                 ex.printStackTrace();
+                prog(false);
+                Toast.makeText(getContext(), "Ocorreu um erro", Toast.LENGTH_LONG).show();
             }
             return null;
         }

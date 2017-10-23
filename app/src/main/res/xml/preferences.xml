@@ -6,27 +6,58 @@
         android:entries="@array/pref_example_list_titles"
         android:entryValues="@array/pref_example_list_values"
         android:key="fill_login"
-        android:negativeButtonText="@null"
-        android:positiveButtonText="@null"
         android:title="@string/pref_field_title"
         android:summary="@string/pref_filed_summary"/>
 
-    <PreferenceCategory android:title="@string/app_colors">
+    <PreferenceCategory android:title="Colors">
+        <PreferenceScreen android:title="@string/app_colors">
 
-        <com.flask.colorpicker.ColorPickerPreference
-            android:key="PrimaryColor"
-            android:defaultValue="#3F51B5"
-            android:title="@string/primary_color_pref"
-            android:summary="@string/primary_color_summ"
-            app:lightnessSlider="true" />
+            <PreferenceCategory android:title="@string/all_app_colors">
 
-        <com.flask.colorpicker.ColorPickerPreference
-            android:key="AccentColor"
-            android:defaultValue="#FF4081"
-            android:title="@string/accent_color_pref"
-            android:summary="@string/accent_color_summ"
-            app:lightnessSlider="true" />
+                <com.flask.colorpicker.ColorPickerPreference
+                    android:key="PrimaryColor"
+                    android:defaultValue="-12627531"
+                    android:title="@string/primary_color_pref"
+                    android:summary="@string/primary_color_summ"
+                    app:initialColor="-12627531"
+                    app:lightnessSlider="true" />
 
+                <com.flask.colorpicker.ColorPickerPreference
+                    android:key="AccentColor"
+                    android:defaultValue="-49023"
+                    android:title="@string/accent_color_pref"
+                    android:summary="@string/accent_color_summ"
+                    app:initialColor="-49023"
+                    app:lightnessSlider="true" />
+
+            </PreferenceCategory>
+
+            <PreferenceCategory android:title="@string/post_colors">
+
+                <com.flask.colorpicker.ColorPickerPreference
+                    android:key="PostContent"
+                    android:defaultValue="-16777216"
+                    android:title="@string/posts_text"
+                    app:initialColor="-16777216"
+                    app:lightnessSlider="true" />
+
+                <com.flask.colorpicker.ColorPickerPreference
+                    android:key="PostAuthor"
+                    android:defaultValue="-16777216"
+                    android:title="@string/posts_author"
+                    app:initialColor="-16777216"
+                    app:lightnessSlider="true" />
+
+                <com.flask.colorpicker.ColorPickerPreference
+                    android:key="PostDate"
+                    android:defaultValue="-16777216"
+                    android:title="@string/posts_data"
+                    app:initialColor="-16777216"
+                    app:lightnessSlider="true" />
+
+            </PreferenceCategory>
+
+        </PreferenceScreen>
     </PreferenceCategory>
 
 </PreferenceScreen>

@@ -7,25 +7,30 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 
 /**
- * Created by vinibrenobr11 on 26/02/2017 at 21:17
+ * Created by vinibrenobr11 on 26/02/2017 at 21:17<br><br>
+ *
+ * Essa Classe distribui conexões com o servidor MySQL
  */
 public class ConnectionClass {
 
-    /**
-     * Essa classe Faz a conexão ao bando de dados MySQL
-     * E retorna essa conexão como uma Interface Connection
-     */
     private String exception;
 
-    // Em caso de uma exception esse método retorna a
-    // mensagem dessa Exception
+    /**
+     * Obtém uma excecão que occoreu durante a realização da conexão
+     * @return Mensagem da Exceção
+     */
     public String getException() {
         return exception;
     }
 
-    // Início do método que realiza e retorna a Conexão
+    /**
+     * Aqui é realizada conexão com o MySQL
+     * @param schema define em qual database será feita a conexão 1 para schema de Mensagens e 0
+     * para schema padrão
+     * @return conexão ao database, null em caso de erro
+     */
     @SuppressLint("NewApi")
-    public Connection conn() {
+    public Connection conn(boolean schema) {
 
         // Essa linha faz com que qualquer tipo de conexão
         // Seja permitida, sendo segura ou não
@@ -36,19 +41,22 @@ public class ConnectionClass {
 
         try {
 
-            // Diz qual a classe do driver que
-            // Será usada para realizar a conexão com o banco
+            // Diz qual a classe do driver que será usada para realizar a conexão com o banco
             Class.forName("com.mysql.jdbc.Driver");
 
-            // Define o limite de tempo antes
-            // Da conexão ser encerrada por timeout
+            // Define o limite de tempo antes da conexão ser encerrada por timeout
             DriverManager.setLoginTimeout(10);
 
-            /*
-            Realiza a conexão e a atribui
-            ao objeto Connection
-             */
-            conn = DriverManager.getConnection("jdbc:mysql://192.168.0.254/app", "App", "123456");
+            String base;
+
+            // Dependendo do parâmetro, uma database é escolhida
+            if (schema)
+                base = "app_messages";
+            else
+                base = "app";
+
+            //Realiza a conexão e a atribui ao objeto Connection
+            conn = DriverManager.getConnection("jdbc:mysql://192.168.0.254/" + base, "App", "123456");
 
         } catch (Exception se) {
             /*
@@ -64,7 +72,8 @@ public class ConnectionClass {
             // Imprime tudo sobre o erro no console
             se.printStackTrace();
         }
-        // Retorna a Conexão. null, se algum erro ocorreu
+
+        // Retorna a Conexão. null se algum erro ocorreu
         return conn;
     }
 }

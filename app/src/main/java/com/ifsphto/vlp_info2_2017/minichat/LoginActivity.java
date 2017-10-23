@@ -1,9 +1,7 @@
-package com.ifsphto.vlp_info2_2017.minichat;  // TODO: 02/03/2017  Encontrar e alterar ícones do projeto
+package com.ifsphto.vlp_info2_2017.minichat;
 
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
@@ -20,9 +18,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.ifsphto.vlp_info2_2017.minichat.connection.ConnectionClass;
 import com.ifsphto.vlp_info2_2017.minichat.page.MainPage;
+import com.ifsphto.vlp_info2_2017.minichat.security.Encrypt;
 import com.ifsphto.vlp_info2_2017.minichat.settings.SettingsActivity;
 
 import java.sql.Connection;
@@ -47,16 +48,17 @@ public class LoginActivity extends AppCompatActivity {
     private String collum;
     private Button sign_in;
 
-    // SharedPreferences
+    // SharedPreferences e conexão
     private SharedPreferences prefs;
     private ConnectionClass connectionClass;
 
-    private ProgressDialog dlg;
+    // ProgressBar que indica que o login esta sendo efetuado
+    private ProgressBar prog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_login);
 
         // Verificam se o usuário está conectado a uma rede ou não
         ConnectivityManager connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -66,9 +68,9 @@ public class LoginActivity extends AppCompatActivity {
         connectionClass = new ConnectionClass();
 
         // Recupera os EditTexts
-        edt_login    = (EditText) findViewById(R.id.edt_login);
-        edt_password = (EditText) findViewById(R.id.edt_password);
-        sign_in      = (Button) findViewById(R.id.sign_in_button);
+        edt_login    = findViewById(R.id.edt_login);
+        edt_password = findViewById(R.id.edt_password);
+        sign_in      = findViewById(R.id.sign_in_button);
 
         // Obtém o arquivo SharedPreferences
         prefs = getSharedPreferences(LOGIN_PREFS, MODE_PRIVATE);
@@ -84,6 +86,9 @@ public class LoginActivity extends AppCompatActivity {
                         }
                     }).show();
         }
+        // FIXME: 22/10/2017 Impedir login sem conexão. De maneira bem feita
+
+        prog = findViewById(R.id.prog_spinner);
 
         // Ação que será realizada quando o botão de login for clicado
         sign_in.setOnClickListener(new View.OnClickListener() {
@@ -95,7 +100,12 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Obtém os dados dos EditText e os verifica para caso de informação inválida
+     */
     private void getLoginData() {
+
+        // TODO: 22/10/2017 Ocultar teclado automaticamente
 
         // Obtém os dados dos campos
         user_or_email = edt_login.getText().toString();
@@ -132,7 +142,7 @@ public class LoginActivity extends AppCompatActivity {
             focusView = edt_login;
             cancel = true;
         }else
-            collum = "UserId";
+            collum = "Name";
 
         // O processo é cancelado e volta para a tela de login
         if (cancel) {
@@ -141,18 +151,30 @@ public class LoginActivity extends AppCompatActivity {
         }
         else {
 
-            // Se chegar até aqui tudo está OK e um dialogo é criado
-            dlg = new ProgressDialog(this);
-
-            dlg.incrementProgressBy(ProgressDialog.STYLE_SPINNER);
-            dlg.setCancelable(false);
-            dlg.setTitle(getString(R.string.checking_data));
-            dlg.setMessage(getString(R.string.pls_wait));
-            dlg.show();
+            showOrDismissProgress(true);
 
             // Executa a classe DoLogin para realizar a conexão
             DoLogin doLogin = new DoLogin();
             doLogin.execute("");
+        }
+    }
+
+    /**
+     * Esse método dependendo do parametro exibirá o ProgressBar indicando
+     * que o login está sendo efetuado, ou ele faz o ProgressBar
+     * desaparecer e volta com todo o layout
+     * @param show true para exibir progresso, false para normalizar o layout
+     */
+    private void showOrDismissProgress(boolean show) {
+
+        if (show) {
+            prog.setVisibility(View.VISIBLE);
+            findViewById(R.id.login_form).setVisibility(View.GONE);
+            closeOptionsMenu();
+        } else {
+            prog.setVisibility(View.GONE);
+            findViewById(R.id.login_form).setVisibility(View.VISIBLE);
+            openOptionsMenu();
         }
     }
 
@@ -169,7 +191,7 @@ public class LoginActivity extends AppCompatActivity {
 
             case R.id.menu_new_user:
                 Intent it = new Intent(this, RegistrationActivity.class);
-                startActivityForResult(it, REQUEST_CODE_NEW_USER); // Não coloca o finish aqui, já ta certo
+                startActivityForResult(it, REQUEST_CODE_NEW_USER);
                 break;
             case R.id.stg_Item:
                 Intent its = new Intent(this, SettingsActivity.class);
@@ -179,13 +201,14 @@ public class LoginActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void startUserActWPD() {
+    /**
+     * Inicia para MainPage
+     */
+    public void startUserAct() {
 
         // Se tudo ocorrer bem a tela inicial será carregada
 
         Intent it = new Intent(LoginActivity.this, MainPage.class);
-
-        dlg.dismiss();
 
         SharedPreferences.Editor ed = prefs.edit();
 
@@ -208,14 +231,20 @@ public class LoginActivity extends AppCompatActivity {
             // O nome ou email desse usuário criado será colocado nos campos
             edt_login.setText(data.getStringExtra("result"));
             edt_password.setText("");
+
+            Toast.makeText(this, getString(R.string.new_user_success), Toast.LENGTH_LONG).show();
         }
         // Verifica se o usuário voltou das configurações de Wi-fi
         else if (resultCode == 0) {
             // Verifica como está a rede e exibe um alerta se ele está agora conectado ou não
-            ConnectivityManager connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+            ConnectivityManager connManager = (ConnectivityManager) getSystemService
+                    (Context.CONNECTIVITY_SERVICE);
+
             NetworkInfo mwifi = connManager.getActiveNetworkInfo();
             if (mwifi == null)
-                Snackbar.make(sign_in, getString(R.string.no_connection), Snackbar.LENGTH_INDEFINITE).show();
+                Snackbar.make(sign_in
+                        , getString(R.string.no_connection)
+                        , Snackbar.LENGTH_INDEFINITE).show();
             else
                 Snackbar.make(sign_in, getString(R.string.connected), Snackbar.LENGTH_LONG).show();
         }
@@ -224,33 +253,17 @@ public class LoginActivity extends AppCompatActivity {
     private class DoLogin extends AsyncTask<String,String,String> {
         String z = "";
         boolean isSuccess = false;
-        boolean user_non_exists;
 
         @Override
         protected void onPostExecute(String r) {
 
-            AlertDialog.Builder al = new AlertDialog.Builder(LoginActivity.this);
-            al.setIcon(android.R.drawable.ic_dialog_alert);
-            al.setTitle(getString(R.string.error_login_title));
-            al.setMessage(r);
-            if (user_non_exists) {
-                al.setNeutralButton(getString(R.string.return_new_user_dlgbutton), null);
-                al.setPositiveButton(getString(R.string.create_new_user_dlgbutton), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        Intent it = new Intent(LoginActivity.this, RegistrationActivity.class);
-                        it.putExtra("login", user_or_email);
-                        startActivityForResult(it, REQUEST_CODE_NEW_USER);
-                    }
-                });
-            }else
-                al.setNeutralButton("OK", null);
-
             if (isSuccess)
-                startUserActWPD();
+                startUserAct();
             else {
-                dlg.dismiss();
-                al.show();
+                AlertDialog.Builder err = new AlertDialog.Builder(LoginActivity.this);
+                err.setMessage(getString(R.string.login_incorrect));
+                err.create().show();
+                showOrDismissProgress(false);
                 sign_in.setClickable(true);
             }
         }
@@ -260,37 +273,34 @@ public class LoginActivity extends AppCompatActivity {
 
             try {
 
-                Connection con = connectionClass.conn();
+                Connection con = connectionClass.conn(false);
 
                 if (con == null)
                     z = connectionClass.getException();
                 else {
-                    String query = "select * from Usertbl where "
-                            + collum + "='" + user_or_email + "' and Password='" + password + "'";
+
+                    user_or_email = user_or_email.replace("'", "''");
+
+                    String query = "SELECT * FROM User WHERE "
+                            + collum + "='" + user_or_email + "' AND Password='" + Encrypt
+                            .encryptPass(password) + "'";
                     Statement stmt = con.createStatement();
                     ResultSet rs = stmt.executeQuery(query);
 
                     if (rs.next()) {
                         isSuccess = true;
                         SharedPreferences.Editor ed = prefs.edit();
-                        ed.putString("name", rs.getString(1));
-                        ed.putString("email", rs.getString(2));
+                        ed.putInt("id", rs.getInt(1));
+                        ed.putString("name", rs.getString(2));
+                        ed.putString("email", rs.getString(3));
+
                         if (!prefs.getBoolean(SEND_DATA, false)) {
-                            stmt.execute("INSERT INTO Info VALUES ('" + Build.MODEL + "','" + Build.VERSION.RELEASE + "')");
+                            stmt.execute("INSERT INTO Info VALUES ('" +
+                                    Build.MODEL + "','" + Build.VERSION.RELEASE + "')");
+
                             ed.putBoolean(SEND_DATA, true);
                         }
                         ed.apply();
-                    }
-                    else {
-                        query = "select * from Usertbl where "
-                                + collum + "='" + user_or_email + "'";
-                        rs = stmt.executeQuery(query);
-                        if(rs.next())
-                            z = getString(R.string.wrong_password);
-                        else {
-                            z = getString(R.string.user_non_exists);
-                            user_non_exists = true;
-                        }
                     }
                 }
             } catch (Exception ex) {

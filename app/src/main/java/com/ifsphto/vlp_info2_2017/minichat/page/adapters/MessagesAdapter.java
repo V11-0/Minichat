@@ -15,46 +15,59 @@ import com.ifsphto.vlp_info2_2017.minichat.R;
 import com.ifsphto.vlp_info2_2017.minichat.object.Message;
 
 /**
- * Created by vinibrenobr11 on 29/04/2017 at 01:28
+ * Created by vinibrenobr11 on 29/04/2017 at 01:28<br><br>
+ *
+ * Essa classe serve, digamos, para organizar as mensagens na tela de conversa
+ * @see ArrayAdapter para mais detalhes.
  */
 public class MessagesAdapter extends ArrayAdapter<Message> {
-
-    /**
-     * Essa classe serve, digamos, para organizar as mensagens
-     * na tela de conversa
-     *
-     * @see ArrayAdapter para mais detalhes
-     */
 
     // ArrayList com todas as mensagens dessa conversa
     private List<Message> chatMessageList = new ArrayList<>();
 
+    /**
+     * Adiciona uma mensagem ao Adapter
+     * @param object Mensagem
+     */
     @Override
     public void add(Message object) {
         chatMessageList.add(object);
         super.add(object);
     }
 
-    // Construtor dessa classe, recebe um objeto
-    // Do tipo Context e um layout
+    /**
+     * Construtor
+     * @param context Context da Aplicação
+     * @param textViewResourceId Layout a ser usado para exibir as mensagems
+     */
     public MessagesAdapter(Context context, int textViewResourceId) {
         super(context, textViewResourceId);
     }
 
-    // Retorna o número de Mensagens no Array
+    /**
+     * Retorna o número de objetos do ArrayList
+     * @return Tamanho do Array.
+     */
     public int getCount() {
         return this.chatMessageList.size();
     }
 
-    // Retorna uma Mensagem no index passado por parâmetro do Array
+    /**
+     * Retorna uma Mensagem no index passado por parâmetro do Array
+     * @param index index.
+     * @return Mensagem
+     */
     public Message getItem(int index) {
         return this.chatMessageList.get(index);
     }
 
-    /*
-    Esse método "constroi" o layout das Mensagens
-     Ele define em qual lado da tela a Mensagem
-     vai ficar
+    /**
+     * Constroí a view com as mensagens.
+     *
+     * @param position Não sei.
+     * @param convertView Não sei.
+     * @param parent Não sei.
+     * @return View com as mensagens.
      */
     @NonNull
     public View getView(int position, View convertView, @NonNull ViewGroup parent) {
@@ -66,6 +79,8 @@ public class MessagesAdapter extends ArrayAdapter<Message> {
         LayoutInflater inflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         // Define se a mensagem vai ficar no lado esquerdo ou direito da tela
+        assert chatMessageObj != null;
+
         if (chatMessageObj.isLeft())
             row = inflater.inflate(R.layout.left, parent, false);
         else

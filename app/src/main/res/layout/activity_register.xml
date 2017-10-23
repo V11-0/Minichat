@@ -10,6 +10,15 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.ifsphto.vlp_info2_2017.minichat.RegistrationActivity">
 
+    <ProgressBar
+        android:id="@+id/prog_spinner_reg"
+        style="@android:style/Widget.DeviceDefault.Light.ProgressBar.Large"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_marginBottom="8dp"
+        android:visibility="gone" />
+
     <ScrollView
         android:id="@+id/new_user_form"
         android:layout_width="match_parent"
@@ -32,6 +41,7 @@
                     android:layout_height="wrap_content"
                     android:hint="@string/prompt_user"
                     android:inputType="text"
+                    android:maxLength="40"
                     android:maxLines="1" />
 
             </android.support.design.widget.TextInputLayout>
@@ -121,14 +131,6 @@
                 android:layout_marginTop="16dp"
                 android:text="@string/sign_up"
                 android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/textView4"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:layout_alignParentTop="true"
-                android:text="O nome de usuario não pode ter caracteres especiais, eles bugam o banco de dados, e eu to com preguiça de arrumar isso." />
 
 
         </LinearLayout>

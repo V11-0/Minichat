@@ -1,7 +1,6 @@
 <resources>
     <string name="app_name" translatable="false">Minichat</string>
     <string name="title_activity_main">Sign in</string>
-    <string name="help_textview">To create a User for you, please, go to the 3 dots to the top-right of your screen.</string>
     <string name="err_no_network">You aren\'t connect to any Wi-Fi network</string>
     <string name="err_no_net_action">Connect</string>
     <string name="connected">Connected!</string>
@@ -23,19 +22,10 @@
     <string name="password_weak">Weak</string>
     <string name="sign_up">Sign Up</string>
     <string name="pls_wait">Please wait</string>
-    <string name="checking_data">Checking Data</string>
     <string name="c_password">Confirm the password</string>
     <string name="error_c_password">Passwords aren\'t the same</string>
-    <string name="signing_up">Signing Up</string>
-    <string name="pls_wait_while_database">Please wait while database is updated</string>
     <string name="prompt_email">Email</string>
     <string name="error_email_invalid">This email address is invalid</string>
-    <string name="error_login_title">Error</string>
-    <string name="wrong_password">Incorrect Password</string>
-    <string name="pd_success_title">Success</string>
-    <string name="user_non_exists">This user doesn\'t exist, do want to create it?</string>
-    <string name="create_new_user_dlgbutton">Create Now</string>
-    <string name="return_new_user_dlgbutton">No, return</string>
     <string name="new_user_success">User successfully created</string>
     <string name="error_user_exists">This user already exists</string>
     <string name="error_email_exists">This email is already linked in other account</string>
@@ -62,7 +52,6 @@
     <string name="new_new">New</string>
     <string name="fab_new_post">Public Post</string>
     <string name="publish">Post it!</string>
-    <string name="post_error">You can not use alone quotation marks</string>
     <string name="error_post_null">What are you wanting to post?</string>
     <string name="fab_new_message">Message</string>
 
@@ -87,7 +76,6 @@
     <string name="dlg_load_users_title">Loading Available Users</string>
     <string name="check_net">Please, check your internet connection</string>
     <string name="pick_up">Pick up someone:</string>
-    <string name="load_posts">Loading Posts</string>
     <string name="posts">Posts</string>
     <string name="sending">Sending</string>
     <string name="msg_empty">Why do you want to send an empty message?</string>
@@ -96,12 +84,10 @@
     <string name="fastconfig_item_title">Fast Settings</string>
     <string name="update_av_title">Yeah, a new update is available!!!</string>
     <string name="update_av_msg">Do you want to download it?\n\n</string>
-    <string name="dlg_this_ver">This version:</string>
-    <string name="dlg_new_ver">\nNew version:</string>
+    <string name="update_this_ver">This version: %d</string>
+    <string name="update_new_ver">\nNew version: %d</string>
     <string name="not_now">Not now</string>
     <string name="ofcourse">Of Course!</string>
-    <string name="no_updates">No Updates</string>
-    <string name="verifying">Verifying</string>
 
     <string name="primary_color_pref">Primary Color</string>
     <string name="primary_color_summ">Choose the Primary Color of the Application</string>
@@ -111,7 +97,20 @@
     <string name="accent_color_pref">Accent Color</string>
     <string name="accent_color_summ">Choose the Accent color in the App</string>
     <string name="updating">Updating</string>
-    <string name="downloading">Downloading Update File</string>
+    <string name="downloading">Downloading Update File: %.1f%%</string>
     <string name="down_success">File Downloaded</string>
+    <string name="login_incorrect">Incorrect Credencials</string>
+    <string name="all_app_colors">All Application Colors</string>
+    <string name="post_colors">Post Colors</string>
+    <string name="posts_text">Post Text</string>
+    <string name="posts_author">Post Author</string>
+    <string name="posts_data">Post Date</string>
+    <string name="post_sucess">Sucessfully Posted</string>
+    <string name="time_exceeded">Time Limit Exceeded</string>
+    <string name="up_to_date">Your App is up to date</string>
+    <string name="downloading_literaly">Downloading</string>
+    <string name="touch_here">Touch here to Install it</string>
+    <string name="error_download">An error ocurred during download</string>
+    <string name="error_lit">Error</string>
 
 </resources>

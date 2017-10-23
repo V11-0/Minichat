@@ -1,8 +1,6 @@
 package com.ifsphto.vlp_info2_2017.minichat;
 
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -20,17 +18,17 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.ifsphto.vlp_info2_2017.minichat.connection.ConnectionClass;
+import com.ifsphto.vlp_info2_2017.minichat.security.Encrypt;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
+/**
+ * Activity para criar um novo usuário no MySQL<br>
+ *     Ela é bem parecida com {@link LoginActivity}
+ */
 public class RegistrationActivity extends AppCompatActivity {
-
-    /**
-     * Essa classe é bem parecida com a
-     * @see LoginActivity , com um layout bem parecido
-     */
 
     // Campos de texto, suas string e botão para fazer cadastro
     private EditText edt_new_user;
@@ -38,7 +36,7 @@ public class RegistrationActivity extends AppCompatActivity {
     private EditText edt_new_password;
     private EditText edt_confirm_password;
     private Button signup_button;
-    private String user;
+    private String user_name;
     private String email;
     private String password;
 
@@ -54,23 +52,21 @@ public class RegistrationActivity extends AppCompatActivity {
 
     private ConnectionClass connectionClass;
 
-    private ProgressDialog dlg;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_new_user);
+        setContentView(R.layout.activity_register);
 
         connectionClass = new ConnectionClass();
 
         // Recupera todas as Views do Layout
-        edt_new_user         = (EditText) findViewById(R.id.edt_new_user);
-        edt_new_email        = (EditText) findViewById(R.id.edt_new_email);
-        edt_new_password     = (EditText) findViewById(R.id.edt_new_password);
-        edt_confirm_password = (EditText) findViewById(R.id.edt_confirm_password);
+        edt_new_user         = findViewById(R.id.edt_new_user);
+        edt_new_email        = findViewById(R.id.edt_new_email);
+        edt_new_password     = findViewById(R.id.edt_new_password);
+        edt_confirm_password = findViewById(R.id.edt_confirm_password);
 
-        passwordStrong       = (ProgressBar)findViewById(R.id.passwordStrong);
-        strength_text        = (TextView) findViewById(R.id.strength_text);
+        passwordStrong       = findViewById(R.id.passwordStrong);
+        strength_text        = findViewById(R.id.strength_text);
 
         // Obtém o que foi passado da outra atividade para essa
         Bundle bundle = getIntent().getExtras();
@@ -109,6 +105,8 @@ public class RegistrationActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable s) {
 
+                // FIXME: 22/10/2017 Melhorar isso aqui
+
                 int progress = 0;
                 int color = 0;
                 String pass = String.valueOf(s);
@@ -143,7 +141,7 @@ public class RegistrationActivity extends AppCompatActivity {
         });
 
         // Recupera e define a ação ao botão ser pressionado
-        signup_button = (Button) findViewById(R.id.user_sign_up);
+        signup_button = findViewById(R.id.user_sign_up);
         signup_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -163,7 +161,7 @@ public class RegistrationActivity extends AppCompatActivity {
         edt_new_user.setError(null);
         edt_new_password.setError(null);
 
-        user             = edt_new_user.getText().toString();
+        user_name = edt_new_user.getText().toString();
         email            = edt_new_email.getText().toString();
         password         = edt_new_password.getText().toString();
         String cPassword = edt_confirm_password.getText().toString();
@@ -205,11 +203,11 @@ public class RegistrationActivity extends AppCompatActivity {
             cancel = true;
         }
 
-        if (TextUtils.isEmpty(user)) {
+        if (TextUtils.isEmpty(user_name)) {
             edt_new_user.setError(getString(R.string.error_field_required));
             focusView = edt_new_user;
             cancel = true;
-        }else if (user.length() > 70) {
+        }else if (user_name.length() > 70) {
             edt_new_user.setError(getString(R.string.error_user_length));
             focusView = edt_new_user;
             cancel = true;
@@ -218,9 +216,10 @@ public class RegistrationActivity extends AppCompatActivity {
 
             // Verifica se há algum caractere especial no texto digitado pela pessoa
             // usando chars
+
             for (int i = 32; i <= 127; i++) {
 
-                if (user.contains(String.valueOf((char) i))) {
+                if (user_name.contains(String.valueOf((char) i))) {
                     edt_new_user.setError(getString(R.string.error_user_special_chars));
                     focusView = edt_new_user;
                     cancel = true;
@@ -246,17 +245,27 @@ public class RegistrationActivity extends AppCompatActivity {
 
         else {
 
-            dlg = new ProgressDialog(this);
-            dlg.incrementProgressBy(ProgressDialog.STYLE_SPINNER);
-            dlg.setCancelable(false);
-            dlg.setTitle(getString (R.string.signing_up) );
-            dlg.setMessage(getString (R.string.pls_wait_while_database) );
-            dlg.show();
+            progress(true);
 
             // A conexão é iniciada
-            CreateUser createUser = new CreateUser();
-            createUser.execute("");
+            new CreateUser().execute("");
         }
+    }
+
+    /**
+     * Exibe ou remove progresso
+     * @param show true, para exibir, false para normalizar layout
+     */
+    private void progress(boolean show) {
+
+        if (show) {
+            findViewById(R.id.new_user_form).setVisibility(View.GONE);
+            findViewById(R.id.prog_spinner_reg).setVisibility(View.VISIBLE);
+        } else {
+            findViewById(R.id.new_user_form).setVisibility(View.VISIBLE);
+            findViewById(R.id.prog_spinner_reg).setVisibility(View.GONE);
+        }
+
     }
 
     private class CreateUser extends AsyncTask<String,String,String> {
@@ -273,45 +282,38 @@ public class RegistrationActivity extends AppCompatActivity {
                 ad.setMessage(r);
 
             if(isSuccess) {
-                ad.setPositiveButton(getString(R.string.pd_success_title), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
 
-                        /*
-                        Cria um diálogo que retorna para a tela de login, e verifica
-                        as preferencias do usuário, se a preferencia estiver ativada
-                        os dados cadastrados aparecerão nos campos da tela de login
-                         */
-                        SharedPreferences stg_pref = getSharedPreferences(getPackageName() + "_preferences", MODE_PRIVATE);
-                        String pref = stg_pref.getString("fill_login", "0");
-                        Intent it = new Intent();
+                /*
+                   Cria um diálogo que retorna para a tela de login, e verifica
+                   as preferencias do usuário, se a preferencia estiver ativada
+                   os dados cadastrados aparecerão nos campos da tela de login
+                 */
+                SharedPreferences stg_pref = getSharedPreferences(getPackageName() + "_preferences", MODE_PRIVATE);
+                String pref = stg_pref.getString("fill_login", "0");
+                Intent it = new Intent();
 
-                        switch (pref) {
+                switch (pref) {
 
-                            case "1":
-                                it.putExtra("result", email);
-                                break;
-                            case "2":
-                                it.putExtra("result", user);
-                                break;
-                            default:
-                                Log.v("Option is Disabled", "Field will stay empty");
-                        }
-                        setResult(LoginActivity.REQUEST_CODE_NEW_USER, it);
-                        finish();
-                    }
-                });
-                ad.setIcon(R.drawable.ic_info_black_24dp);
-                dlg.dismiss();
-                ad.show();
+                    case "1":
+                        it.putExtra("result", email);
+                        break;
+                    case "2":
+                        it.putExtra("result", user_name);
+                        break;
+                    default:
+                        Log.v("Option is Disabled", "Field will stay empty");
+                }
+                setResult(LoginActivity.REQUEST_CODE_NEW_USER, it);
+                finish();
             }
             else {
+
+                progress(false);
 
                 // Se ocorerer um erro, ele mostra ao usuário e volta para a tela
                 // de cadastro
                 if (error_exist_e != null) {
 
-                    dlg.dismiss();
                     error_exist_e.setError(error_exist_s);
                     focusView.requestFocus();
 
@@ -319,7 +321,6 @@ public class RegistrationActivity extends AppCompatActivity {
 
                     ad.setNeutralButton("OK", null);
                     ad.setIcon(android.R.drawable.ic_dialog_alert);
-                    dlg.dismiss();
                     ad.show();
                 }
             }
@@ -332,17 +333,20 @@ public class RegistrationActivity extends AppCompatActivity {
 
             try {
 
-                Connection con = connectionClass.conn();
+                Connection con = connectionClass.conn(false);
 
                 if (con == null)
                     z = connectionClass.getException();
                 else {
 
+                    user_name = user_name.replace("'", "''");
+                    email = email.replace("'", "''");
+                    password = Encrypt.encryptPass(password);
+
                     // Verifica se já existe um usuário com o mesmo nome
-                    String query = "SELECT * FROM Usertbl WHERE UserId ='" + user + "'";
+                    String query = "SELECT * FROM User WHERE Name ='" + user_name + "'";
                     Statement stmt = con.createStatement();
                     ResultSet rs = stmt.executeQuery(query);
-
 
                     if (rs.next()) {
                         error_exist_e = edt_new_user;
@@ -353,7 +357,7 @@ public class RegistrationActivity extends AppCompatActivity {
                     else {
 
                         // Verifica se já existe um email igual
-                        query = "select * from Usertbl where Email  ='" + email + "'";
+                        query = "SELECT * FROM User WHERE Email = '" + email + "'";
                         rs = stmt.executeQuery(query);
 
                         if (rs.next()) {
@@ -365,7 +369,8 @@ public class RegistrationActivity extends AppCompatActivity {
                         else {
 
                             // Insere os valores no MySQL
-                            stmt.execute("INSERT INTO Usertbl VALUES ('" + user + "', '" + email + "', '" + password + "')");
+                            stmt.execute("INSERT INTO User (Name, Email, Password) VALUES " +
+                                    "('" + user_name + "', '" + email + "', '" + password + "')");
 
                             z = getString(R.string.new_user_success);
                             isSuccess = true;

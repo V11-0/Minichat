@@ -10,21 +10,17 @@ import android.widget.TextView;
 import java.util.List;
 
 import com.ifsphto.vlp_info2_2017.minichat.R;
+import com.ifsphto.vlp_info2_2017.minichat.colors.ColorsPreferences;
 import com.ifsphto.vlp_info2_2017.minichat.object.Post;
 
 /**
- * Created by vinibrenobr11 on 21/03/2017 at 21:39
+ * Created by vinibrenobr11 on 21/03/2017 at 21:39<br><br>
+ *
+ * Essa Classe personaliza o layout do {@link android.widget.ListView}<br>
+ *
+ * O Layout "Padrão" do ListView no Android só permite um texto por objeto
  */
 public class PostsAdapter extends BaseAdapter {
-
-    /**
-     * Essa Classe personaliza o layout do
-     * @see android.widget.ListView, veja sua
-     * documentacão para mais informações
-     *
-     * O Layout "Padrão" do ListView no Android
-     * só permite um texto por objeto
-     */
 
     // Atributos da classe
     private final List<Post> post;
@@ -32,11 +28,10 @@ public class PostsAdapter extends BaseAdapter {
     private int layout;
 
     /**
-     * Construtor dessa classe, onde recebe:
-     * @param post onde é a Lista com todos os posts
-     * @param act onde é a Activity passasa por referencia
-     * @param layout onde diz qual layout será usado para criar
-     *               a ListView personalizada
+     * Construtor dessa classe
+     * @param post Lista com todos os posts
+     * @param act Activity passasa por referencia
+     * @param layout Diz qual layout será usado para criar a ListView personalizada
      */
     public PostsAdapter(List<Post> post, Activity act, int layout) {
         this.post = post;
@@ -44,26 +39,42 @@ public class PostsAdapter extends BaseAdapter {
         this.layout = layout;
     }
 
-    // Retorna o número de Posts na List
+    /**
+     * Retorna o número de Posts na List.
+     * @return Número de Posts.
+     */
     @Override
     public int getCount() {
         return post.size();
     }
 
-    // Retorna um Post específico na posição passada
-    // como parâmetro
+    /**
+     * Retorna um post na posição indicada.
+     * @param position posição no ArrayList.
+     * @return Post na posição indicada.
+     */
     @Override
     public Object getItem(int position) {
         return post.get(position);
     }
 
-    // Retorna 0, por que?, não sei.
+    /**
+     * Serve pra nada, só tá aqui porque tem que ser implementado.
+     * @param position posição
+     * @return 0
+     */
     @Override
     public long getItemId(int position) {
         return 0;
     }
 
-    // Retorna a View onde esses Posts ficarão
+    /**
+     * Faz e retorna toda a view dos posts
+     * @param position Não Sei.
+     * @param convertView Não Sei.
+     * @param parent Não Sei.
+     * @return Posts
+     */
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         @SuppressLint("ViewHolder") View view = act.getLayoutInflater().inflate(layout, parent, false);
@@ -90,6 +101,13 @@ public class PostsAdapter extends BaseAdapter {
         post_content.setText(postagem.getContent());
         post_author.setText(postagem.getAuthor());
         post_date.setText(postagem.getDate());
+
+        // Obtém as cores das preferencias e as seta
+        int[] colors = ColorsPreferences.getPostColors(act);
+
+        post_content.setTextColor(colors[0]);
+        post_author.setTextColor(colors[1]);
+        post_date.setTextColor(colors[2]);
 
         // Retorna a View
         return view;
