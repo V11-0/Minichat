@@ -34,19 +34,24 @@ public class SettingsFragment extends PreferenceFragment {
 
             update.setEnabled(false);
 
-            Snackbar.make(getView(), R.string.verifying, Snackbar.LENGTH_SHORT).show();
+            android.view.View v = getView();
+
+            assert v != null;
+            Snackbar.make(v, R.string.verifying, Snackbar.LENGTH_SHORT).show();
 
             new Thread(() -> {
 
-                final Object o = VerifyUpdate.verify(getActivity());
+                android.app.Activity act = getActivity();
 
-                getActivity().runOnUiThread(() -> {
+                final Object o = VerifyUpdate.verify(act);
+
+                act.runOnUiThread(() -> {
                     if (o instanceof AlertDialog.Builder)
                         ((AlertDialog.Builder) o).create().show();
-                    else if (o.toString().equals("0"))
-                        Toast.makeText(getActivity(), R.string.up_to_date, Toast.LENGTH_LONG).show();
+                    else if (o.equals("0"))
+                        Toast.makeText(act, R.string.up_to_date, Toast.LENGTH_LONG).show();
                     else
-                        Toast.makeText(getActivity(), o.toString(), Toast.LENGTH_LONG).show();
+                        Toast.makeText(act, o.toString(), Toast.LENGTH_LONG).show();
 
                     update.setEnabled(true);
                 });

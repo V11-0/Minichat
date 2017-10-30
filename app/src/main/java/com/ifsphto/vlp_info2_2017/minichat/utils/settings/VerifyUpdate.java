@@ -47,8 +47,10 @@ public abstract class VerifyUpdate {
                 // Se existir uma versão mais nova, um dialogo é feito, se não
                 // um toast avisa que o usuário está na versão mais recente
 
-                view[0] = makeSomeWarning(newVersion > thisVersion
-                        , BuildConfig.VERSION_NAME, nVersion, a);
+                if (newVersion > thisVersion)
+                    view[0] = makeSomeWarning(BuildConfig.VERSION_NAME, nVersion, a);
+                else
+                    view[0] = "0";
 
             } catch (Exception e) {
                 view[0] = e.getMessage();
@@ -68,46 +70,36 @@ public abstract class VerifyUpdate {
     }
 
     /**
-     * Produz um {@link AlertDialog.Builder} ou {@link Toast} com textos setados
-     * dependendo dos parametros passados
+     * Produz um {@link AlertDialog.Builder} para alertar que á uma versão mais recente do App
+     * disponível
      *
-     * @param hasUpdate   Se há uma versão mais recente do app disponivel, caso true, é retornado o
-     *                    Dialog
      * @param thisVersion Versão atual do app
      * @param newVersion  Versão nova do app
      * @param act         Activity
-     * @return Object podendo ser {@link AlertDialog.Builder} ou {@link Toast}.
+     * @return {@link AlertDialog.Builder} com informações sobre a nova versão
      */
-    private static Object makeSomeWarning(boolean hasUpdate, String thisVersion
+    private static AlertDialog.Builder makeSomeWarning(String thisVersion
             , String newVersion, final Activity act) {
 
-        if (hasUpdate) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(act);
+        builder.setTitle(act.getString(R.string.update_av_title))
+                .setMessage(act.getString(R.string.update_av_msg)
+                        + act.getString(R.string.update_this_ver) + " " + thisVersion
+                        + act.getString(R.string.update_new_ver) + " " + newVersion)
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(act);
+                // Se o usuário clicar em sim, o serviço para baixar é iniciado
+                .setPositiveButton(act.getString(R.string.ofcourse),
+                        (dialogInterface, i) -> {
+                            act.startService(new Intent(act.getApplicationContext(),
+                                    DownloadService.class));
 
-            builder.setTitle(act.getString(R.string.update_av_title))
-
-                    .setMessage(act.getString(R.string.update_av_msg)
-                            + act.getString(R.string.update_this_ver) + " " + thisVersion
-                            + act.getString(R.string.update_new_ver) + " " + newVersion)
-
-                    // Se o usuário clicar em sim, o serviço para baixar é iniciado
-                    .setPositiveButton(act.getString(R.string.ofcourse),
-                            (dialogInterface, i) -> {
-                                act.startService(new Intent(act.getApplicationContext(),
-                                        DownloadService.class));
-
-                                Toast.makeText(act.getApplicationContext(),
-                                        act.getString(R.string.downloading_literaly)
-                                        , Toast.LENGTH_LONG).show();
-                            })
+                            Toast.makeText(act.getApplicationContext(),
+                                    act.getString(R.string.downloading_literaly)
+                                    , Toast.LENGTH_LONG).show();
+                        })
 
                     .setNegativeButton(act.getString(R.string.not_now), null);
 
-            return builder;
-
-        } else {
-            return "0";
-        }
+        return builder;
     }
 }
