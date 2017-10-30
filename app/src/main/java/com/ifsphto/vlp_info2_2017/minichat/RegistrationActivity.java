@@ -2,15 +2,13 @@ package com.ifsphto.vlp_info2_2017.minichat;
 
 import android.app.AlertDialog;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.AsyncTask;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -18,7 +16,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.ifsphto.vlp_info2_2017.minichat.connection.ConnectionClass;
-import com.ifsphto.vlp_info2_2017.minichat.security.Encrypt;
+import com.ifsphto.vlp_info2_2017.minichat.utils.security.Encrypt;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -50,14 +48,10 @@ public class RegistrationActivity extends AppCompatActivity {
     // View para indicar um erro
     private View focusView = null;
 
-    private ConnectionClass connectionClass;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
-
-        connectionClass = new ConnectionClass();
 
         // Recupera todas as Views do Layout
         edt_new_user         = findViewById(R.id.edt_new_user);
@@ -142,12 +136,9 @@ public class RegistrationActivity extends AppCompatActivity {
 
         // Recupera e define a ação ao botão ser pressionado
         signup_button = findViewById(R.id.user_sign_up);
-        signup_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                signup_button.setClickable(false);
-                createNewUser();
-            }
+        signup_button.setOnClickListener(view -> {
+            signup_button.setClickable(false);
+            createNewUser();
         });
 
     }
@@ -276,6 +267,8 @@ public class RegistrationActivity extends AppCompatActivity {
         protected void onPostExecute(String r) {
 
             AlertDialog.Builder ad = new AlertDialog.Builder(RegistrationActivity.this);
+
+            // TODO: 29/10/2017 Meio Gambiarra isso aqui
             if(r.length() < 40)
                 ad.setTitle(r);
             else
@@ -284,25 +277,12 @@ public class RegistrationActivity extends AppCompatActivity {
             if(isSuccess) {
 
                 /*
-                   Cria um diálogo que retorna para a tela de login, e verifica
-                   as preferencias do usuário, se a preferencia estiver ativada
-                   os dados cadastrados aparecerão nos campos da tela de login
+                  Cria um diálogo que retorna para a tela de login, e também retorna o nome
+                  de usuário que a pessoa acabou de criar
                  */
-                SharedPreferences stg_pref = getSharedPreferences(getPackageName() + "_preferences", MODE_PRIVATE);
-                String pref = stg_pref.getString("fill_login", "0");
                 Intent it = new Intent();
+                it.putExtra("result", user_name);
 
-                switch (pref) {
-
-                    case "1":
-                        it.putExtra("result", email);
-                        break;
-                    case "2":
-                        it.putExtra("result", user_name);
-                        break;
-                    default:
-                        Log.v("Option is Disabled", "Field will stay empty");
-                }
                 setResult(LoginActivity.REQUEST_CODE_NEW_USER, it);
                 finish();
             }
@@ -333,51 +313,43 @@ public class RegistrationActivity extends AppCompatActivity {
 
             try {
 
-                Connection con = connectionClass.conn(false);
+                Connection con = ConnectionClass.conn(false);
 
-                if (con == null)
-                    z = connectionClass.getException();
-                else {
+                user_name = user_name.replace("'", "''");
+                email = email.replace("'", "''");
+                password = Encrypt.encryptPass(password);
 
-                    user_name = user_name.replace("'", "''");
-                    email = email.replace("'", "''");
-                    password = Encrypt.encryptPass(password);
+                // Verifica se já existe um usuário com o mesmo nome
+                String query = "SELECT * FROM User WHERE Name ='" + user_name + "'";
+                Statement stmt = con.createStatement();
+                ResultSet rs = stmt.executeQuery(query);
 
-                    // Verifica se já existe um usuário com o mesmo nome
-                    String query = "SELECT * FROM User WHERE Name ='" + user_name + "'";
-                    Statement stmt = con.createStatement();
-                    ResultSet rs = stmt.executeQuery(query);
+                if (rs.next()) {
+                    error_exist_e = edt_new_user;
+                    error_exist_s = getString(R.string.error_user_exists);
+                    focusView = edt_new_user;
+                    isSuccess = false;
+                } else {
+
+                    // Verifica se já existe um email igual
+                    query = "SELECT * FROM User WHERE Email = '" + email + "'";
+                    rs = stmt.executeQuery(query);
 
                     if (rs.next()) {
-                        error_exist_e = edt_new_user;
-                        error_exist_s = getString(R.string.error_user_exists);
-                        focusView = edt_new_user;
+                        error_exist_e = edt_new_email;
+                        error_exist_s = getString(R.string.error_email_exists);
+                        focusView = edt_new_email;
                         isSuccess = false;
-                    }
-                    else {
+                    } else {
 
-                        // Verifica se já existe um email igual
-                        query = "SELECT * FROM User WHERE Email = '" + email + "'";
-                        rs = stmt.executeQuery(query);
+                        // Insere os valores no MySQL
+                        stmt.execute("INSERT INTO User (Name, Email, Password) VALUES " +
+                                "('" + user_name + "', '" + email + "', '" + password + "')");
 
-                        if (rs.next()) {
-                            error_exist_e = edt_new_email;
-                            error_exist_s = getString(R.string.error_email_exists);
-                            focusView = edt_new_email;
-                            isSuccess = false;
-                        }
-                        else {
-
-                            // Insere os valores no MySQL
-                            stmt.execute("INSERT INTO User (Name, Email, Password) VALUES " +
-                                    "('" + user_name + "', '" + email + "', '" + password + "')");
-
-                            z = getString(R.string.new_user_success);
-                            isSuccess = true;
-                        }
+                        z = getString(R.string.new_user_success);
+                        isSuccess = true;
                     }
                 }
-
             } catch (Exception ex) {
                 isSuccess = false;
                 z = ex.getMessage();

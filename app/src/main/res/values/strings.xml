@@ -84,16 +84,14 @@
     <string name="fastconfig_item_title">Fast Settings</string>
     <string name="update_av_title">Yeah, a new update is available!!!</string>
     <string name="update_av_msg">Do you want to download it?\n\n</string>
-    <string name="update_this_ver">This version: %d</string>
-    <string name="update_new_ver">\nNew version: %d</string>
+    <string name="update_this_ver">This version: </string>
+    <string name="update_new_ver">\nNew version: </string>
     <string name="not_now">Not now</string>
     <string name="ofcourse">Of Course!</string>
 
+    <string name="app_colors">Application Colors</string>
     <string name="primary_color_pref">Primary Color</string>
     <string name="primary_color_summ">Choose the Primary Color of the Application</string>
-
-    <string name="preferences">Preferences</string>
-    <string name="app_colors">Application Colors</string>
     <string name="accent_color_pref">Accent Color</string>
     <string name="accent_color_summ">Choose the Accent color in the App</string>
     <string name="updating">Updating</string>
@@ -105,12 +103,35 @@
     <string name="posts_text">Post Text</string>
     <string name="posts_author">Post Author</string>
     <string name="posts_data">Post Date</string>
-    <string name="post_sucess">Sucessfully Posted</string>
+    <string name="post_sucess">Successfully Posted</string>
     <string name="time_exceeded">Time Limit Exceeded</string>
     <string name="up_to_date">Your App is up to date</string>
     <string name="downloading_literaly">Downloading</string>
     <string name="touch_here">Touch here to Install it</string>
-    <string name="error_download">An error ocurred during download</string>
+    <string name="error_download">An error occurred during download</string>
     <string name="error_lit">Error</string>
+    <string name="colors_lit">Colors</string>
+    <string name="about">About</string>
+    <string name="pref_update_summary">Version %s</string>
+    <string name="other_options">Other Options</string>
+    <string name="social" translatable="false">Social</string>
+    <string name="verifying">Verifying for Updates</string>
+
+    <string-array name="months">
+        <item>January</item>
+        <item>February</item>
+        <item>March</item>
+        <item>April</item>
+        <item>May</item>
+        <item>June</item>
+        <item>July</item>
+        <item>August</item>
+        <item>September</item>
+        <item>October</item>
+        <item>November</item>
+        <item>December</item>
+    </string-array>
+
+    <string name="post_fomated">%s of %s at %s</string>
 
 </resources>

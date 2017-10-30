@@ -1,4 +1,4 @@
-package com.ifsphto.vlp_info2_2017.minichat.colors;
+package com.ifsphto.vlp_info2_2017.minichat.utils.settings;
 
 import android.app.Activity;
 import android.content.Context;

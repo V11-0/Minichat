@@ -1,4 +1,4 @@
-package com.ifsphto.vlp_info2_2017.minichat.security;
+package com.ifsphto.vlp_info2_2017.minichat.utils.security;
 
 import android.util.Base64;
 

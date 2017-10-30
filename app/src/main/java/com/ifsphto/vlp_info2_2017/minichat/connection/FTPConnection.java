@@ -19,6 +19,8 @@ public abstract class FTPConnection {
     public static FTPClient getConnection() throws IOException {
 
         FTPClient ftp = new FTPClient();
+        ftp.setConnectTimeout(15000);
+        ftp.setDataTimeout(19000);
 
         ftp.connect("192.168.0.254");
         ftp.login("usuario", "teste");
@@ -42,8 +44,7 @@ public abstract class FTPConnection {
                 ftp.disconnect();
             }
 
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException ignored) {
         }
     }
 }

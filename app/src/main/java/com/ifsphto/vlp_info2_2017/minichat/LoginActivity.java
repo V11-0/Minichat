@@ -8,10 +8,10 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.os.Bundle;
 import android.provider.Settings;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -23,8 +23,8 @@ import android.widget.Toast;
 
 import com.ifsphto.vlp_info2_2017.minichat.connection.ConnectionClass;
 import com.ifsphto.vlp_info2_2017.minichat.page.MainPage;
-import com.ifsphto.vlp_info2_2017.minichat.security.Encrypt;
 import com.ifsphto.vlp_info2_2017.minichat.settings.SettingsActivity;
+import com.ifsphto.vlp_info2_2017.minichat.utils.security.Encrypt;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -50,7 +50,6 @@ public class LoginActivity extends AppCompatActivity {
 
     // SharedPreferences e conexão
     private SharedPreferences prefs;
-    private ConnectionClass connectionClass;
 
     // ProgressBar que indica que o login esta sendo efetuado
     private ProgressBar prog;
@@ -64,9 +63,6 @@ public class LoginActivity extends AppCompatActivity {
         ConnectivityManager connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo mwifi = connManager.getActiveNetworkInfo();
 
-        // Cria a Classe ConnectionClass e a atribui ao objeto
-        connectionClass = new ConnectionClass();
-
         // Recupera os EditTexts
         edt_login    = findViewById(R.id.edt_login);
         edt_password = findViewById(R.id.edt_password);
@@ -79,24 +75,16 @@ public class LoginActivity extends AppCompatActivity {
         // de Wi-Fi do dispositivo dele
         if (mwifi == null) {
             Snackbar.make(sign_in, getString(R.string.err_no_network), Snackbar.LENGTH_INDEFINITE)
-                    .setAction(getString(R.string.err_no_net_action), new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            startActivityForResult(new Intent(Settings.ACTION_WIFI_SETTINGS), 0);
-                        }
-                    }).show();
+                    .setAction(getString(R.string.err_no_net_action), v -> startActivityForResult(new Intent(Settings.ACTION_WIFI_SETTINGS), 0)).show();
         }
         // FIXME: 22/10/2017 Impedir login sem conexão. De maneira bem feita
 
         prog = findViewById(R.id.prog_spinner);
 
         // Ação que será realizada quando o botão de login for clicado
-        sign_in.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                sign_in.setClickable(false);
-                getLoginData();
-            }
+        sign_in.setOnClickListener(view -> {
+            sign_in.setClickable(false);
+            getLoginData();
         });
     }
 
@@ -162,7 +150,7 @@ public class LoginActivity extends AppCompatActivity {
     /**
      * Esse método dependendo do parametro exibirá o ProgressBar indicando
      * que o login está sendo efetuado, ou ele faz o ProgressBar
-     * desaparecer e volta com todo o layout
+     * desaparecer e volta com todoo o layout
      * @param show true para exibir progresso, false para normalizar o layout
      */
     private void showOrDismissProgress(boolean show) {
@@ -273,35 +261,30 @@ public class LoginActivity extends AppCompatActivity {
 
             try {
 
-                Connection con = connectionClass.conn(false);
+                Connection con = ConnectionClass.conn(false);
 
-                if (con == null)
-                    z = connectionClass.getException();
-                else {
+                user_or_email = user_or_email.replace("'", "''");
 
-                    user_or_email = user_or_email.replace("'", "''");
+                String query = "SELECT * FROM User WHERE "
+                        + collum + "='" + user_or_email + "' AND Password='" + Encrypt
+                        .encryptPass(password) + "'";
+                Statement stmt = con.createStatement();
+                ResultSet rs = stmt.executeQuery(query);
 
-                    String query = "SELECT * FROM User WHERE "
-                            + collum + "='" + user_or_email + "' AND Password='" + Encrypt
-                            .encryptPass(password) + "'";
-                    Statement stmt = con.createStatement();
-                    ResultSet rs = stmt.executeQuery(query);
+                if (rs.next()) {
+                    isSuccess = true;
+                    SharedPreferences.Editor ed = prefs.edit();
+                    ed.putInt("id", rs.getInt(1));
+                    ed.putString("name", rs.getString(2));
+                    ed.putString("email", rs.getString(3));
 
-                    if (rs.next()) {
-                        isSuccess = true;
-                        SharedPreferences.Editor ed = prefs.edit();
-                        ed.putInt("id", rs.getInt(1));
-                        ed.putString("name", rs.getString(2));
-                        ed.putString("email", rs.getString(3));
+                    if (!prefs.getBoolean(SEND_DATA, false)) {
+                        stmt.execute("INSERT INTO Info VALUES ('" +
+                                Build.MODEL + "','" + Build.VERSION.RELEASE + "')");
 
-                        if (!prefs.getBoolean(SEND_DATA, false)) {
-                            stmt.execute("INSERT INTO Info VALUES ('" +
-                                    Build.MODEL + "','" + Build.VERSION.RELEASE + "')");
-
-                            ed.putBoolean(SEND_DATA, true);
-                        }
-                        ed.apply();
+                        ed.putBoolean(SEND_DATA, true);
                     }
+                    ed.apply();
                 }
             } catch (Exception ex) {
                 z = ex.getMessage();

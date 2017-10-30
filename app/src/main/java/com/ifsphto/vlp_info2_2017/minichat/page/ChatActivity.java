@@ -3,26 +3,27 @@ package com.ifsphto.vlp_info2_2017.minichat.page;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
-import android.view.View;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
-
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
 
 import com.ifsphto.vlp_info2_2017.minichat.LoginActivity;
 import com.ifsphto.vlp_info2_2017.minichat.R;
 import com.ifsphto.vlp_info2_2017.minichat.connection.ConnectionClass;
 import com.ifsphto.vlp_info2_2017.minichat.object.Message;
-import com.ifsphto.vlp_info2_2017.minichat.page.adapters.MessagesAdapter;
+import com.ifsphto.vlp_info2_2017.minichat.utils.adapters.MessagesAdapter;
+
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
 
 /**
  * Classe da tela de conversa, onde é possível enviar e receber mensagens enviadas diretamente
@@ -30,18 +31,13 @@ import com.ifsphto.vlp_info2_2017.minichat.page.adapters.MessagesAdapter;
  */
 public class ChatActivity extends AppCompatActivity {
 
-    // Campo onde a mensagem é digitada
-    private EditText send_message;
-
-    // Adaptador para posicionar as mensagens corretamente na tela
-    private MessagesAdapter ma;
-
     // Strings dizendo qual o nome dos usuários desta conversa
     private static String otherUser;
     private static String hereUser;
-
-    // Cria a classe que fará a conexão ao banco mensagens
-    private ConnectionClass connectionClass = new ConnectionClass();
+    // Campo onde a mensagem é digitada
+    private EditText send_message;
+    // Adaptador para posicionar as mensagens corretamente na tela
+    private MessagesAdapter ma;
     private Connection con = null;
 
     // Mensagem
@@ -59,6 +55,8 @@ public class ChatActivity extends AppCompatActivity {
       */
     private ProgressDialog gmpd;
     private ProgressDialog smpd;
+
+    private SwipeRefreshLayout srl;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -111,12 +109,7 @@ public class ChatActivity extends AppCompatActivity {
         smpd.incrementProgressBy(ProgressDialog.STYLE_SPINNER);
 
         // Define a ação que será realizada quando a pessoa clicar no botão enviar
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                sendMessage();
-            }
-        });
+        fab.setOnClickListener(v -> sendMessage());
 
         // Coloca os atributos do dialogo para indicar q as mensagens da conversa estão
         // sendo obtidas
@@ -125,7 +118,12 @@ public class ChatActivity extends AppCompatActivity {
         gmpd.setCancelable(false);
         gmpd.incrementProgressBy(ProgressDialog.STYLE_SPINNER);
 
-        // Carrega todas as mensagens do banco externo
+        // Recupera SwipeRefreshLayout e Carrega todas as mensagens do banco externo
+        srl = findViewById(R.id.chat_refresh);
+        srl.setColorSchemeColors(Color.BLUE, Color.CYAN, Color.MAGENTA, Color.RED, Color.BLACK);
+        srl.setOnRefreshListener(this::loadMessages);
+
+        srl.setRefreshing(true);
         loadMessages();
     }
 
@@ -168,15 +166,14 @@ public class ChatActivity extends AppCompatActivity {
         // Cria o adaptador
         ma = new MessagesAdapter(getApplicationContext(), R.layout.right);
 
-        // Mostra o dialogo "Carregando mensagens"
-        gmpd.show();
-
         // Obtém as mensagens
         GetMessages gm = new GetMessages();
         gm.execute("");
 
         // Seta o adapter na ListView
         messages_view.setAdapter(ma);
+        srl.setRefreshing(false);
+
     }
 
     private class SendMessage extends AsyncTask<String,String,String> {
@@ -214,33 +211,26 @@ public class ChatActivity extends AppCompatActivity {
 
             try {
 
-                if (con == null)
-                    z = connectionClass.getException();
-                else {
+                String query = "INSERT INTO " + table + " values ('" + hereUser + "', '" + message + "');";
 
-                    String query = "INSERT INTO " + table + " values ('" + hereUser + "', '" + message + "');";
+                Statement stmt = con.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
+                rs = stmt.executeQuery("SHOW TABLES LIKE '" + table + "'");
 
-                    Statement stmt = con.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
-                    rs = stmt.executeQuery("SHOW TABLES LIKE '" + table + "'");
+                if (rs.next()) {
+                    stmt.execute(query);
+                    isSuccess = true;
+                } else {
 
-                    if (rs.next()) {
-                        stmt.execute(query);
-                        isSuccess = true;
-                    }
-                    else {
+                    String query_new_table = "CREATE TABLE " + table + " ( " +
+                            "Who varchar(200) not null, " +
+                            "Content varchar(10000) not null " +
+                            "); ";
 
-                        String query_new_table = "CREATE TABLE " + table + " ( " +
-                                "Who varchar(200) not null, " +
-                                "Content varchar(10000) not null " +
-                                "); ";
+                    stmt.execute(query_new_table);
 
-                        stmt.execute(query_new_table);
-
-                        stmt.execute(query);
-                        isSuccess = true;
-                    }
+                    stmt.execute(query);
+                    isSuccess = true;
                 }
-
             } catch (Exception ex) {
                 z = ex.getMessage();
                 ex.printStackTrace();
@@ -289,13 +279,10 @@ public class ChatActivity extends AppCompatActivity {
             dlg = new AlertDialog.Builder(ChatActivity.this);
             dlg.setNeutralButton("OK", null);
 
-            if (con == null)
-                con = connectionClass.conn(true);
-
             try {
-
                 if (con == null)
-                    z = connectionClass.getException();
+                    con = ConnectionClass.conn(true);
+
                 else {
 
                     Statement stmt = con.createStatement();

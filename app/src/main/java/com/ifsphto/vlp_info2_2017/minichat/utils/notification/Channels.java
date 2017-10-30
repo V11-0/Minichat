@@ -1,9 +1,11 @@
-package com.ifsphto.vlp_info2_2017.minichat.utils;
+package com.ifsphto.vlp_info2_2017.minichat.utils.notification;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
+
+import com.ifsphto.vlp_info2_2017.minichat.utils.Tags;
 
 /**
  * Created by vinibrenobr11 on 21/10/2017 at 22:31:54<br></br>

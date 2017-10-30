@@ -23,17 +23,12 @@
     </item>
 
     <item
-        android:title="@string/fastconfig_item_title">
+        android:title="@string/other_options">
         <menu>
-            <item
-                android:id="@+id/check_update_drawer"
-                android:icon="@android:drawable/stat_sys_download"
-                android:title="@string/pref_update_title" />
-
             <item
                 android:id="@+id/drawer_preferences"
                 android:icon="@drawable/ic_settings_black_24dp"
-                android:title="@string/preferences" />
+                android:title="@string/title_activity_settings"/>
         </menu>
     </item>
 

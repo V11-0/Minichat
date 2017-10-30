@@ -1,4 +1,4 @@
-package com.ifsphto.vlp_info2_2017.minichat.page.adapters;
+package com.ifsphto.vlp_info2_2017.minichat.utils.adapters;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -7,11 +7,11 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
-import java.util.List;
-
 import com.ifsphto.vlp_info2_2017.minichat.R;
-import com.ifsphto.vlp_info2_2017.minichat.colors.ColorsPreferences;
 import com.ifsphto.vlp_info2_2017.minichat.object.Post;
+import com.ifsphto.vlp_info2_2017.minichat.utils.settings.ColorsPreferences;
+
+import java.util.List;
 
 /**
  * Created by vinibrenobr11 on 21/03/2017 at 21:39<br><br>

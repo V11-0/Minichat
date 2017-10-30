@@ -6,26 +6,25 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
-import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
 
 import com.ifsphto.vlp_info2_2017.minichat.LoginActivity;
 import com.ifsphto.vlp_info2_2017.minichat.R;
 import com.ifsphto.vlp_info2_2017.minichat.connection.ConnectionClass;
 import com.ifsphto.vlp_info2_2017.minichat.page.ChatActivity;
+
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
 
 /**
  * Created by vinibrenobr11 on 15/03/2017 at 11:47<br></br>
@@ -36,7 +35,6 @@ import com.ifsphto.vlp_info2_2017.minichat.page.ChatActivity;
 public class MessageFragment extends Fragment {
 
     // Atributos da classe
-    private ConnectionClass connectionClass = new ConnectionClass();
     private ArrayAdapter<String> adpUsers;
     private ProgressDialog pdlg;
     private Dialog dlg;
@@ -64,44 +62,38 @@ public class MessageFragment extends Fragment {
         pdlg.setCancelable(false);
 
         // Método executado quando o botão flutuante recebe um toque
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        fab.setOnClickListener(v -> {
 
-                // Limpa o Array de usuarios e mostra o diálogo
-                adpUsers.clear();
-                pdlg.show();
+            // Limpa o Array de usuarios e mostra o diálogo
+            adpUsers.clear();
+            pdlg.show();
 
-                // Executa a classe para obter os usuários do banco
-                GetUsers gu = new GetUsers();
-                gu.execute("");
+            // Executa a classe para obter os usuários do banco
+            GetUsers gu = new GetUsers();
+            gu.execute("");
 
-                /*
-                Cria um outro dialogo que exibe o nome dos
-                usuários que estão no banco
-                 */
-                dlg = new Dialog(getContext());
-                dlg.setContentView(R.layout.choose_contact);
+            /*
+            Cria um outro dialogo que exibe o nome dos
+            usuários que estão no banco
+             */
+            dlg = new Dialog(getContext());
+            dlg.setContentView(R.layout.choose_contact);
 
-                // Cria um ListView e seta o Adapter nele
-                ListView people_list = dlg.findViewById(R.id.people_list);
-                people_list.setAdapter(adpUsers);
+            // Cria um ListView e seta o Adapter nele
+            ListView people_list = dlg.findViewById(R.id.people_list);
+            people_list.setAdapter(adpUsers);
 
-                // Método executado quando o usuário escolhe um usuário da Lista
-                people_list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            // Método executado quando o usuário escolhe um usuário da Lista
+            people_list.setOnItemClickListener((parent, view, position, id) -> {
 
-                        // Cria o Intent e passa para a tela de Chat quem foi o escolhido
-                        Intent chat = new Intent(getActivity(), ChatActivity.class);
-                        chat.putExtra("SelectedName", adpUsers.getItem(position));
+                // Cria o Intent e passa para a tela de Chat quem foi o escolhido
+                Intent chat = new Intent(getActivity(), ChatActivity.class);
+                chat.putExtra("SelectedName", adpUsers.getItem(position));
 
-                        // Inicia o chat
-                        startActivity(chat);
-                        dlg.dismiss();
-                    }
-                });
-            }
+                // Inicia o chat
+                startActivity(chat);
+                dlg.dismiss();
+            });
         });
     }
 
@@ -109,6 +101,7 @@ public class MessageFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.msg_layout, container, false);
+        // TODO: 29/10/2017 Layout estilo whatsApp
     }
 
     private class GetUsers extends AsyncTask<String,String,String> {
@@ -154,15 +147,11 @@ public class MessageFragment extends Fragment {
 
             try {
 
-                con = connectionClass.conn(false);
+                con = ConnectionClass.conn(false);
 
-                if (con == null)
-                    z = connectionClass.getException();
-                else {
-                    String query = "SELECT Name FROM User";
-                    Statement stmt = con.createStatement();
-                    rs = stmt.executeQuery(query);
-                }
+                String query = "SELECT Name FROM User";
+                Statement stmt = con.createStatement();
+                rs = stmt.executeQuery(query);
 
                 isSuccess = rs.next();
 

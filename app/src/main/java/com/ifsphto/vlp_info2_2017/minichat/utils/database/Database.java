@@ -1,4 +1,4 @@
-package com.ifsphto.vlp_info2_2017.minichat.page.database;
+package com.ifsphto.vlp_info2_2017.minichat.utils.database;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;

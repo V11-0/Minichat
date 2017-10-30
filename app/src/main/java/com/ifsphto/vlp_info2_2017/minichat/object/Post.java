@@ -26,7 +26,6 @@ public class Post {
     public Post(String author, String content, String date) {
         this.author = author;
         this.content = content;
-        //TODO: Formatar data e exibir ela bonitinha
         this.date = date;
     }
 

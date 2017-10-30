@@ -1,10 +1,11 @@
-package com.ifsphto.vlp_info2_2017.minichat.page.adapters;
+package com.ifsphto.vlp_info2_2017.minichat.utils.adapters;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 
-import com.ifsphto.vlp_info2_2017.minichat.page.fragments.*;
+import com.ifsphto.vlp_info2_2017.minichat.page.fragments.MessageFragment;
+import com.ifsphto.vlp_info2_2017.minichat.page.fragments.PostFragment;
 
 /**
  * Created by vinibrenobr11 on 15/03/2017 at 11:42<br><br>

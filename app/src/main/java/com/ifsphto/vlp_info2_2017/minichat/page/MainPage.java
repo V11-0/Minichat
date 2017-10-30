@@ -1,47 +1,40 @@
 package com.ifsphto.vlp_info2_2017.minichat.page;
 
 import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageInfo;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
-import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
+import com.ifsphto.vlp_info2_2017.minichat.LoginActivity;
+import com.ifsphto.vlp_info2_2017.minichat.R;
+import com.ifsphto.vlp_info2_2017.minichat.connection.ConnectionClass;
+import com.ifsphto.vlp_info2_2017.minichat.object.Post;
+import com.ifsphto.vlp_info2_2017.minichat.settings.SettingsActivity;
+import com.ifsphto.vlp_info2_2017.minichat.utils.adapters.PostsAdapter;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-
-import com.ifsphto.vlp_info2_2017.minichat.LoginActivity;
-import com.ifsphto.vlp_info2_2017.minichat.R;
-import com.ifsphto.vlp_info2_2017.minichat.connection.ConnectionClass;
-import com.ifsphto.vlp_info2_2017.minichat.connection.FTPConnection;
-import com.ifsphto.vlp_info2_2017.minichat.services.DownloadService;
-import com.ifsphto.vlp_info2_2017.minichat.object.Post;
-import com.ifsphto.vlp_info2_2017.minichat.page.adapters.PostsAdapter;
-import com.ifsphto.vlp_info2_2017.minichat.settings.SettingsActivity;
-
-import org.apache.commons.net.ftp.FTPClient;
 
 /**
  * Essa classe é, por enquanto a maior do projeto, ela é a pagina inicial
@@ -72,9 +65,6 @@ public class MainPage extends AppCompatActivity
     // Listas e Adapters
     private ArrayList<Post> posts;
     private ListView mPosts;
-
-    // Conexão
-    private ConnectionClass connectionClass = new ConnectionClass();
 
     private SwipeRefreshLayout myRefresh;
 
@@ -140,12 +130,7 @@ public class MainPage extends AppCompatActivity
         myRefresh.setColorSchemeColors(Color.RED, Color.BLUE, Color.GREEN,
                 Color.YELLOW, Color.MAGENTA);
 
-        myRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                new GetPosts().execute("");
-            }
-        });
+        myRefresh.setOnRefreshListener(() -> new GetPosts().execute(""));
 
         myRefresh.setRefreshing(true);
         new GetPosts().execute("");
@@ -180,16 +165,14 @@ public class MainPage extends AppCompatActivity
         // Verifica qual foi a escolha
         switch (item.getItemId()) {
 
+            case R.id.home:
+                break;
             case R.id.nav_messages:
                 // TODO: Abrir layout das mensagens, tipo WhatsApp
                 break;
             case R.id.logout:
                 // Desloga
                 logOut();
-                break;
-            case R.id.check_update_drawer:
-                // Verifica Atualização
-                verifyUpdate();
                 break;
             case R.id.drawer_preferences:
                 // Inicia a tela de configurações
@@ -204,126 +187,6 @@ public class MainPage extends AppCompatActivity
     }
 
     /**
-     * Verifica se há uma versão mais recente do app disponivel, e se sim, exibe um
-     * dialog perguntando se o usuário deseja baixa-lá
-     */
-    public void verifyUpdate() {
-
-        // Inicia a thread para verificar
-        final Thread v = new Thread(new Runnable() {
-            @Override
-            public void run() {
-
-                try {
-
-                    // Conecta ao FTP e obtém um nome de um arquivo que contém a versão mais
-                    // Recente do app
-                    FTPClient ftp = FTPConnection.getConnection();
-                    final short newVersion = Short.parseShort(ftp.listNames()[0]);
-
-                    // Obtém a versão do app instalado
-                    PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
-                    final short thisVersion = (short) pInfo.versionCode;
-
-                    FTPConnection.closeConnection(ftp);
-
-                    // Se existir uma versão mais nova, um dialogo é feito, se não
-                    // um toast avisa que o usuário está na versão mais recente
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-
-                            Object o = makeSomeWarning(newVersion > thisVersion
-                                    , thisVersion, newVersion);
-
-                            if (o instanceof AlertDialog.Builder)
-                                ((AlertDialog.Builder) o).create().show();
-                            else
-                                ((Toast) o).show();
-
-                        }
-                    });
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-
-            /**
-             * Produz um {@link AlertDialog.Builder} ou {@link Toast} com textos setados
-             * dependendo dos parametros passados
-             * @param op Se há uma versão mais recente do app disponivel, caso true, é retornado o
-             *           Dialog
-             * @param t Versão atual do app
-             * @param n Versão nova do app
-             * @return Object podendo ser {@link AlertDialog.Builder} ou {@link Toast}.
-             */
-            private Object makeSomeWarning(boolean op, short t, short n) {
-
-                if (op) {
-
-                    AlertDialog.Builder builder = new AlertDialog.Builder(MainPage.this);
-
-                    builder.setTitle(getString(R.string.update_av_title))
-
-                            .setMessage(getString(R.string.update_av_msg)
-                                    + getString(R.string.update_this_ver, t)
-                                    + getString(R.string.update_new_ver, n))
-
-                            // Se o usuário clicar em sim, o serviço para baixar é iniciado
-                            .setPositiveButton(getString(R.string.ofcourse),
-                                    new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialogInterface, int i) {
-                                            startService(new Intent(MainPage.this,
-                                                    DownloadService.class));
-
-                                            Toast.makeText(getApplicationContext(),
-                                                    getString(R.string.downloading_literaly)
-                                                    , Toast.LENGTH_LONG).show();
-                                        }
-                                    })
-
-                            .setNegativeButton(getString(R.string.not_now), null);
-
-                    return builder;
-                }
-
-                return Toast.makeText(MainPage.this, getString(R.string.up_to_date)
-                        , Toast.LENGTH_LONG);
-            }
-        });
-
-        v.start();
-
-        // Se a verificação demorar mais de 15 segundos, a thread correspondente é interrompida
-        // e uma toast alertando erro é exibido
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Thread.sleep(15000);
-
-                    if (v.isAlive()) {
-                        v.interrupt();
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Toast.makeText(getBaseContext(), getString(R.string.time_exceeded),
-                                        Toast.LENGTH_LONG).show();
-                            }
-                        });
-                    }
-
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
-
-    }
-
-    /**
      * Desloga o usuário
      */
     public void logOut() {
@@ -333,24 +196,21 @@ public class MainPage extends AppCompatActivity
         ald.setMessage(getString(R.string.confirm_ald_title));
         ald.setNeutralButton(getString(R.string.no), null);
         // Define o botão positivo do dialogo e qual sua ação
-        ald.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
+        ald.setPositiveButton(getString(R.string.yes), (dialog, which) -> {
 
-                // Cria um Intent para a Activity LoginActivity
-                final Intent it = new Intent(MainPage.this, LoginActivity.class);
+            // Cria um Intent para a Activity LoginActivity
+            final Intent it = new Intent(MainPage.this, LoginActivity.class);
 
-                // Cria um editor para o arquivo SharedPreferences
-                final SharedPreferences.Editor ed = prefs.edit();
+            // Cria um editor para o arquivo SharedPreferences
+            final SharedPreferences.Editor ed = prefs.edit();
 
-                // Define que o usuário não está mais logado
-                ed.putBoolean(PREF_LOG, false);
+            // Define que o usuário não está mais logado
+            ed.putBoolean(PREF_LOG, false);
 
-                // Aplica as ediçoes no arquivo e volta para a tela de login
-                ed.apply();
-                startActivity(it);
-                finish();
-            }
+            // Aplica as ediçoes no arquivo e volta para a tela de login
+            ed.apply();
+            startActivity(it);
+            finish();
         });
         ald.show();
     }
@@ -403,6 +263,8 @@ public class MainPage extends AppCompatActivity
         AlertDialog.Builder dlg;
         Connection con;
 
+        String[] months = getResources().getStringArray(R.array.months);
+
         @Override
         protected void onPostExecute(String s) {
 
@@ -417,13 +279,13 @@ public class MainPage extends AppCompatActivity
                     PostsAdapter adp_posts = new PostsAdapter(posts, MainPage.this, R.layout.post_item);
                     rs.first();
 
-                    int i = 0;
+                    short i = 0;
 
                     while (true) {
                         if (i != 0)
                             rs.next();
-                        Post post = new Post(rs.getString(1), rs.getString(2), rs.getString(3));
-                        posts.add(i, post);
+                        Post post = new Post(rs.getString(1), rs.getString(2), formatDate(rs.getString(3)));
+                        posts.add(post);
                         i++;
                         if (rs.isLast()) {
                             mPosts.setAdapter(adp_posts);
@@ -447,6 +309,15 @@ public class MainPage extends AppCompatActivity
             }
         }
 
+        private String formatDate(String date) {
+
+            String[] data = date.split("-");
+            String[] an = data[2].split(" ");
+
+            return getString(R.string.post_fomated, an[0], months[Integer.parseInt(data[1]) - 1],
+                    an[1].substring(0, 5));
+        }
+
         @Override
         protected String doInBackground(String... params) {
 
@@ -455,17 +326,11 @@ public class MainPage extends AppCompatActivity
 
             try {
 
-                con = connectionClass.conn(false);
+                con = ConnectionClass.conn(false);
 
-                if (con == null)
-                    z = connectionClass.getException();
-                else {
-
-                    String query = "SELECT * FROM Posts_form";
-
-                    Statement stmt = con.createStatement();
-                    rs = stmt.executeQuery(query);
-                }
+                String query = "SELECT * FROM Posts_form";
+                Statement stmt = con.createStatement();
+                rs = stmt.executeQuery(query);
 
                 isSuccess = rs.next();
 

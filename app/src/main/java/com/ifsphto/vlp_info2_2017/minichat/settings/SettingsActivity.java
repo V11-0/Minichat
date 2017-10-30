@@ -1,5 +1,6 @@
 package com.ifsphto.vlp_info2_2017.minichat.settings;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
 
 
@@ -21,5 +22,21 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         // Carrega o Fragment SettingsFragment
         getFragmentManager().beginTransaction().replace(android.R.id.content,
                 new SettingsFragment()).commit();
+
+        String log = getIntent().getStringExtra("message");
+
+        if (log != null)
+            showDetailDialog(log).show();
     }
+
+    private AlertDialog showDetailDialog(String message) {
+
+        AlertDialog.Builder dlg_log = new AlertDialog.Builder(this);
+        dlg_log.setTitle("Detalhes do Erro");
+        dlg_log.setMessage(message);
+        dlg_log.setNegativeButton("Ok", null);
+
+        return dlg_log.create();
+    }
+
 }

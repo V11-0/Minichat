@@ -1,4 +1,4 @@
-package com.ifsphto.vlp_info2_2017.minichat.page.adapters;
+package com.ifsphto.vlp_info2_2017.minichat.utils.adapters;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -8,11 +8,11 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.ifsphto.vlp_info2_2017.minichat.R;
 import com.ifsphto.vlp_info2_2017.minichat.object.Message;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by vinibrenobr11 on 29/04/2017 at 01:28<br><br>
@@ -26,6 +26,16 @@ public class MessagesAdapter extends ArrayAdapter<Message> {
     private List<Message> chatMessageList = new ArrayList<>();
 
     /**
+     * Construtor
+     *
+     * @param context            Context da Aplicação
+     * @param textViewResourceId Layout a ser usado para exibir as mensagems
+     */
+    public MessagesAdapter(Context context, int textViewResourceId) {
+        super(context, textViewResourceId);
+    }
+
+    /**
      * Adiciona uma mensagem ao Adapter
      * @param object Mensagem
      */
@@ -33,15 +43,6 @@ public class MessagesAdapter extends ArrayAdapter<Message> {
     public void add(Message object) {
         chatMessageList.add(object);
         super.add(object);
-    }
-
-    /**
-     * Construtor
-     * @param context Context da Aplicação
-     * @param textViewResourceId Layout a ser usado para exibir as mensagems
-     */
-    public MessagesAdapter(Context context, int textViewResourceId) {
-        super(context, textViewResourceId);
     }
 
     /**

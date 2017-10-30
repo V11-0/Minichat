@@ -14,8 +14,9 @@ import android.support.v4.content.FileProvider;
 
 import com.ifsphto.vlp_info2_2017.minichat.R;
 import com.ifsphto.vlp_info2_2017.minichat.connection.FTPConnection;
-import com.ifsphto.vlp_info2_2017.minichat.utils.Channels;
+import com.ifsphto.vlp_info2_2017.minichat.settings.SettingsActivity;
 import com.ifsphto.vlp_info2_2017.minichat.utils.Tags;
+import com.ifsphto.vlp_info2_2017.minichat.utils.notification.Channels;
 
 import org.apache.commons.net.ftp.FTPClient;
 
@@ -66,13 +67,15 @@ public class DownloadService extends IntentService {
         boolean success;
         FTPClient ftp = null;
 
+        Thread mProgress = null;
+
         try {
 
             ftp = FTPConnection.getConnection();
 
             // Obtém o tamanho do arquivo, porém esse comando retorna um
             // status e o tamanho
-            ftp.sendCommand("SIZE", "app.apk");
+            ftp.sendCommand("SIZE", "app-release.apk");
             String reply = ftp.getReplyString().split(" ")[1];
 
             // O Tamanho é retornado com 2 caracteres não numéricos no final
@@ -80,58 +83,47 @@ public class DownloadService extends IntentService {
             final long all = Long.parseLong(reply.substring(0, reply.length() - 2));
 
             // Define o arquivo e onde ele será salvo
-            final File file = new File(getExternalCacheDir(), "app.apk");
+            File file = new File(getExternalCacheDir(), "app-release.apk");
 
             // Cria um buffer para escrever os dados
-            final OutputStream out = new BufferedOutputStream(new FileOutputStream(file));
+            OutputStream out = new BufferedOutputStream(new FileOutputStream(file));
 
             // Thread que gerencia o progresso de download na notificação
-            final Thread mProgress = new Thread(new Runnable() {
-                @Override
-                public void run() {
+            mProgress = new Thread(() -> {
 
-                    double now = 0;
-                    double bef;
+                double now = 0;
 
-                    boolean finished = false;
+                while (!Thread.currentThread().getName().equals("f")) {
 
-                    while (!finished) {
+                    double prog = (now / all) * 100;
 
-                        bef = now;
+                    mBuilder.setProgress(100, (int) prog, false);
+                    mBuilder.setContentText(getString(R.string.downloading, prog));
 
-                        double prog = (now / all) * 100;
+                    mNotifierManager.notify(0, mBuilder.build());
 
-                        mBuilder.setProgress(100, (int) prog, false);
-                        mBuilder.setContentText(getString(R.string.downloading, prog));
-
-                        mNotifierManager.notify(0, mBuilder.build());
-
-                        try {
-                            Thread.sleep(2000);
-                        } catch (InterruptedException ignored) {}
-
-                        now = file.length();
-
-                        if (bef == now)
-                            finished = true;
+                    try {
+                        Thread.sleep(2000);
+                    } catch (InterruptedException ignored) {
                     }
+
+                    now = file.length();
                 }
             });
 
             mProgress.start();
 
             // Baixa o arquivo do servidor
-            success = ftp.retrieveFile("app.apk", out);
-            // FIXME: 22/10/2017 Notificação quando dá erro no download
+            success = ftp.retrieveFile("app-release.apk", out);
 
             out.flush();
             out.close();
 
+            mProgress.setName("f");
+            Thread.sleep(3000);
+
             // Se tudo ocorreu bem, a notificação diz que o arquivo foi baixado
             if (success) {
-
-                if (mProgress.isAlive())
-                    Thread.sleep(3000);
 
                 // Seta um pending intent na notificação, para que quando o usuário clique
                 // na notificação, ela abra a tela de instalação
@@ -168,22 +160,36 @@ public class DownloadService extends IntentService {
 
                 // Exibe ela
                 mNotifierManager.notify(0, mBuilder.build());
-
-            } else {
-
-                mBuilder.setContentText(getString(R.string.error_download))
-                        .setContentTitle(getString(R.string.error_lit))
-                        .setProgress(0, 0, false)
-                        .setSmallIcon(android.R.drawable.stat_notify_error)
-                        .setContentIntent(null)
-                        .setOngoing(false)
-                        .setAutoCancel(true);
-
-                mNotifierManager.notify(0, mBuilder.build());
-
             }
         } catch (Exception e) {
+
+            Intent rIntent = new Intent(this, SettingsActivity.class);
+            rIntent.putExtra("message", e.getMessage());
+
+            TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+            stackBuilder.addParentStack(SettingsActivity.class);
+            stackBuilder.addNextIntent(rIntent);
+
+            if (mProgress != null && mProgress.isAlive()) {
+                try {
+                    mProgress.setName("f");
+                    Thread.sleep(3000);
+                } catch (InterruptedException ignored) {
+                }
+            }
+
+            mBuilder.setContentText("Toque para mais detalhes")
+                    .setContentTitle(getString(R.string.error_lit))
+                    .setProgress(0, 0, false)
+                    .setSmallIcon(android.R.drawable.stat_notify_error)
+                    .setContentIntent(stackBuilder.getPendingIntent(1, PendingIntent.FLAG_UPDATE_CURRENT))
+                    .setOngoing(false)
+                    .setAutoCancel(true);
+
+            mNotifierManager.notify(0, mBuilder.build());
+
             e.printStackTrace();
+
         }finally {
 
             if (ftp != null)
