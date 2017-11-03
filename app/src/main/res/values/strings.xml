@@ -5,7 +5,7 @@
     <string name="err_no_net_action">Connect</string>
     <string name="connected">Connected!</string>
     <string name="no_connection">No connection, the App will not work without internet access</string>
-    <string name="title_register_act">Create New User</string>
+    <string name="title_register_act">Create User</string>
     <string name="prompt_login">User name or Email</string>
     <string name="prompt_user">User name</string>
     <string name="prompt_password">Password</string>
@@ -133,5 +133,7 @@
     </string-array>
 
     <string name="post_fomated">%s of %s at %s</string>
+    <string name="menu_refresh_title">Recarregar pessoas disponíveis</string>
+    <string name="refresh_alr_running">Already Running</string>
 
 </resources>

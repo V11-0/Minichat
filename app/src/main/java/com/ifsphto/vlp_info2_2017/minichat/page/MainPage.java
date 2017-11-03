@@ -15,6 +15,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
@@ -29,6 +30,7 @@ import com.ifsphto.vlp_info2_2017.minichat.connection.ConnectionClass;
 import com.ifsphto.vlp_info2_2017.minichat.connection.NSDConnection;
 import com.ifsphto.vlp_info2_2017.minichat.object.Post;
 import com.ifsphto.vlp_info2_2017.minichat.settings.SettingsActivity;
+import com.ifsphto.vlp_info2_2017.minichat.utils.Tags;
 import com.ifsphto.vlp_info2_2017.minichat.utils.adapters.PostsAdapter;
 
 import java.sql.Connection;
@@ -58,24 +60,38 @@ public class MainPage extends AppCompatActivity
 
     // Objeto representando o arquivo SharedPreferences
     private SharedPreferences prefs;
+    private String name;
 
     // Botões flutuantes
     private FloatingActionMenu fab_menu;
     private FloatingActionButton new_msg;
 
     // Listas e Adapters
-    private ArrayList<Post> posts;
     private ListView mPosts;
 
-    private SwipeRefreshLayout myRefresh;
-
-    private Toolbar toolbar;
     private NSDConnection nsdConn;
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
         nsdConn.finishEverything();
+        super.onDestroy();
+    }
+
+    @Override
+    protected void onStop() {
+        nsdConn.finishEverything();
+        super.onStop();
+    }
+
+    @Override
+    protected void onResume() {
+        try {
+            nsdConn.doIt();
+            nsdConn.register(name);
+        } catch (Exception e) {
+            Log.i(Tags.LOG_TAG, "Serviço já registrado na rede");
+        }
+        super.onResume();
     }
 
     @Override
@@ -84,11 +100,11 @@ public class MainPage extends AppCompatActivity
         setContentView(R.layout.activity_page);
 
         // Cria e seta um título à barra superior
-        toolbar = findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
         toolbar.setTitle(getString(R.string.title_activity_user));
 
         // Cria um Array e recupera a ListView
-        posts = new ArrayList<>();
         mPosts = findViewById(R.id.posts);
 
         // Recupera o arquivo SharedPreferences
@@ -131,27 +147,31 @@ public class MainPage extends AppCompatActivity
 
         // Seta o nome de usuario e email nos TextView da barra lateral,
         // obtido atráves do arquivo SharedPreferences
-        userId.setText(prefs.getString("name", "Error"));
+        name = prefs.getString("name", null);
+        userId.setText(name);
         userEmail.setText(prefs.getString("email", "Error"));
 
-        myRefresh = findViewById(R.id.swiperefresh);
+        SwipeRefreshLayout myRefresh = findViewById(R.id.swiperefresh);
         myRefresh.setColorSchemeColors(Color.RED, Color.BLUE, Color.GREEN,
                 Color.YELLOW, Color.MAGENTA);
 
-        //myRefresh.setOnRefreshListener(() -> new GetPosts().execute(""));
-
-        //myRefresh.setRefreshing(true);
-        //new GetPosts().execute("");
+        myRefresh.setOnRefreshListener(() -> {
+        });
 
         nsdConn = new NSDConnection(this);
 
-        try {
-            nsdConn.doIt(prefs.getString("name", null));
-            ArrayList<String> devices = nsdConn.getDevices();
-            Log.i("Devices", devices.toString());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        new Thread(() -> {
+            try {
+                nsdConn.doIt();
+                nsdConn.register(name);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }).start();
+
+        //myRefresh.setRefreshing(true);
+        //new GetPosts().execute("");
     }
 
     /**
@@ -204,6 +224,65 @@ public class MainPage extends AppCompatActivity
         return true;
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_page, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        switch (item.getItemId()) {
+
+            case R.id.menu_refresh:
+                discover();
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void discover() {
+        new Thread(() -> {
+
+            try {
+                nsdConn.discover();
+            } catch (Exception e) {
+                MainPage.this.runOnUiThread(() ->
+                        Toast.makeText(getApplicationContext(), R.string.refresh_alr_running, Toast.LENGTH_LONG)
+                        .show());
+            }
+
+            ArrayList<String> dev;
+            ArrayList<Post> p;
+
+            while (true) {
+
+                try {
+                    synchronized (nsdConn.getDevices()) {
+                        nsdConn.getDevices().wait();
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                dev = nsdConn.getDevices();
+                p = new ArrayList<>();
+
+                for (String d : dev)
+                    p.add(new Post(null, d, null));
+
+                PostsAdapter adapter = new PostsAdapter(p, MainPage.this,
+                        R.layout.post_item);
+
+                mPosts.setAdapter(null);
+                MainPage.this.runOnUiThread(() -> mPosts.setAdapter(adapter));
+                Log.i(Tags.LOG_TAG, "Adapter setado");
+            }
+
+        }).start();
+    }
+
     /**
      * Desloga o usuário
      */
@@ -211,10 +290,10 @@ public class MainPage extends AppCompatActivity
 
         // Cria um dialogo perguntando se o usuário tem certeza
         AlertDialog.Builder ald = new AlertDialog.Builder(this);
-        ald.setMessage(getString(R.string.confirm_ald_title));
-        ald.setNeutralButton(getString(R.string.no), null);
+        ald.setMessage(R.string.confirm_ald_title);
+        ald.setNeutralButton(R.string.no, null);
         // Define o botão positivo do dialogo e qual sua ação
-        ald.setPositiveButton(getString(R.string.yes), (dialog, which) -> {
+        ald.setPositiveButton(R.string.yes, (dialog, which) -> {
 
             // Cria um Intent para a Activity LoginActivity
             final Intent it = new Intent(MainPage.this, LoginActivity.class);
@@ -267,96 +346,7 @@ public class MainPage extends AppCompatActivity
 
         // Verifica se o resultado corresponde ao sucesso
         if (resultCode == 52) {
-            Toast.makeText(this, getString(R.string.post_sucess), Toast.LENGTH_LONG).show();
-            myRefresh.setRefreshing(true);
-            new GetPosts().execute("");
-        }
-    }
-
-    private class GetPosts extends AsyncTask<String,String,String> {
-        String z = "";
-        ResultSet rs;
-        boolean isSuccess = false;
-
-        AlertDialog.Builder dlg;
-        Connection con;
-
-        String[] months = getResources().getStringArray(R.array.months);
-
-        @Override
-        protected void onPostExecute(String s) {
-
-            try {
-
-                dlg.setMessage(z);
-
-                // Obtém os posts e os adicionam na List
-                if (isSuccess) {
-
-                    posts.clear();
-                    PostsAdapter adp_posts = new PostsAdapter(posts, MainPage.this, R.layout.post_item);
-                    rs.first();
-
-                    short i = 0;
-
-                    while (true) {
-                        if (i != 0)
-                            rs.next();
-                        Post post = new Post(rs.getString(1), rs.getString(2), formatDate(rs.getString(3)));
-                        posts.add(post);
-                        i++;
-                        if (rs.isLast()) {
-                            mPosts.setAdapter(adp_posts);
-                            Log.i("Posts Added", i + " were add");
-                            toolbar.setSubtitle(i + " " + getString(R.string.posts));
-                            break;
-                        }
-                    }
-                } else
-                    dlg.show();
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                dlg.show();
-            } finally {
-                myRefresh.setRefreshing(false);
-                try {
-                    if (con != null)
-                        con.close();
-                } catch (SQLException ignored) {}
-            }
-        }
-
-        private String formatDate(String date) {
-
-            String[] data = date.split("-");
-            String[] an = data[2].split(" ");
-
-            return getString(R.string.post_fomated, an[0], months[Integer.parseInt(data[1]) - 1],
-                    an[1].substring(0, 5));
-        }
-
-        @Override
-        protected String doInBackground(String... params) {
-
-            dlg = new AlertDialog.Builder(MainPage.this);
-            dlg.setNeutralButton("OK", null);
-
-            try {
-
-                con = ConnectionClass.conn(false);
-
-                String query = "SELECT * FROM Posts_form";
-                Statement stmt = con.createStatement();
-                rs = stmt.executeQuery(query);
-
-                isSuccess = rs.next();
-
-            } catch (Exception ex) {
-                z = ex.getMessage();
-                ex.printStackTrace();
-            }
-            return z;
+            Toast.makeText(this, R.string.post_sucess, Toast.LENGTH_LONG).show();
         }
     }
 }

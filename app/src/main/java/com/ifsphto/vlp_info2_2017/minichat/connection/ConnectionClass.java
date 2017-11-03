@@ -27,6 +27,8 @@ public abstract class ConnectionClass {
                 .permitAll().build();
         StrictMode.setThreadPolicy(policy);
 
+        Class.forName("com.mysql.jdbc.Driver");
+
         // Define o limite de tempo antes da conexão ser encerrada por timeout
         DriverManager.setLoginTimeout(15);
 

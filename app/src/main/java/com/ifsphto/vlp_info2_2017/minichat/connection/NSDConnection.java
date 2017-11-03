@@ -29,16 +29,21 @@ public class NSDConnection {
         this.context = context;
     }
 
-    public void doIt(String name) throws Exception {
+    public void doIt() throws Exception {
         initializeServerSocket();
         initializeRegistrationListener();
+        initializeDiscoveryListener();
+    }
+
+    public void discover() {
+        mNsdManager.discoverServices(Tags.Nsd.TYPE, NsdManager.PROTOCOL_DNS_SD, mDiscoveryListener);
+    }
+
+    public void register(String name) {
         registerService(name);
     }
 
     public ArrayList<String> getDevices() {
-        initializeDiscoveryListener();
-        mNsdManager.discoverServices(Tags.Nsd.TYPE, NsdManager.PROTOCOL_DNS_SD, mDiscoveryListener);
-
         return names;
     }
 
@@ -69,7 +74,7 @@ public class NSDConnection {
 
             @Override
             public void onUnregistrationFailed(NsdServiceInfo nsdServiceInfo, int i) {
-
+                Log.e(Tags.LOG_TAG, "Falha ao unRegistrar serviço");
             }
 
             @Override
@@ -101,8 +106,13 @@ public class NSDConnection {
                 if (service.getServiceType().equals(Tags.Nsd.TYPE)) {
                     if (service.getServiceName().equals(si.getServiceName()))
                         Log.i(Tags.LOG_TAG, "Voce se achou");
-                    else
+                    else {
                         names.add(service.getServiceName());
+                        Log.i(Tags.LOG_TAG, "Dispositivo Encontrado");
+                        synchronized (names) {
+                            names.notify();
+                        }
+                    }
                 }
             }
 
@@ -120,18 +130,28 @@ public class NSDConnection {
 
             @Override
             public void onStartDiscoveryFailed(String serviceType, int errorCode) {
-                Log.e(Tags.LOG_TAG, "Discovery failed: Error code:" + errorCode);
+                Log.e(Tags.LOG_TAG, "Discovery failed: Error code: " + errorCode);
             }
 
             @Override
             public void onStopDiscoveryFailed(String serviceType, int errorCode) {
-                Log.e(Tags.LOG_TAG, "Discovery failed: Error code:" + errorCode);
+                Log.e(Tags.LOG_TAG, "Discovery failed: Error code: " + errorCode);
             }
         };
     }
 
     public void finishEverything() {
-        mNsdManager.unregisterService(mRegistrationListener);
-        mNsdManager.stopServiceDiscovery(mDiscoveryListener);
+
+        try {
+            mNsdManager.stopServiceDiscovery(mDiscoveryListener);
+        } catch (Exception e) {
+            Log.i(Tags.LOG_TAG, "Discovery Listener já estava parado");
+        }
+
+        try {
+            mNsdManager.unregisterService(mRegistrationListener);
+        } catch (Exception e) {
+            Log.i(Tags.LOG_TAG, "RegistrationListener já Estava parado");
+        }
     }
 }
