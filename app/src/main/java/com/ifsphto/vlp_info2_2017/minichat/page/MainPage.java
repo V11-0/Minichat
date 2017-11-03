@@ -26,6 +26,7 @@ import com.github.clans.fab.FloatingActionMenu;
 import com.ifsphto.vlp_info2_2017.minichat.LoginActivity;
 import com.ifsphto.vlp_info2_2017.minichat.R;
 import com.ifsphto.vlp_info2_2017.minichat.connection.ConnectionClass;
+import com.ifsphto.vlp_info2_2017.minichat.connection.NSDConnection;
 import com.ifsphto.vlp_info2_2017.minichat.object.Post;
 import com.ifsphto.vlp_info2_2017.minichat.settings.SettingsActivity;
 import com.ifsphto.vlp_info2_2017.minichat.utils.adapters.PostsAdapter;
@@ -69,6 +70,13 @@ public class MainPage extends AppCompatActivity
     private SwipeRefreshLayout myRefresh;
 
     private Toolbar toolbar;
+    private NSDConnection nsdConn;
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        nsdConn.finishEverything();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -130,10 +138,20 @@ public class MainPage extends AppCompatActivity
         myRefresh.setColorSchemeColors(Color.RED, Color.BLUE, Color.GREEN,
                 Color.YELLOW, Color.MAGENTA);
 
-        myRefresh.setOnRefreshListener(() -> new GetPosts().execute(""));
+        //myRefresh.setOnRefreshListener(() -> new GetPosts().execute(""));
 
-        myRefresh.setRefreshing(true);
-        new GetPosts().execute("");
+        //myRefresh.setRefreshing(true);
+        //new GetPosts().execute("");
+
+        nsdConn = new NSDConnection(this);
+
+        try {
+            nsdConn.doIt(prefs.getString("name", null));
+            ArrayList<String> devices = nsdConn.getDevices();
+            Log.i("Devices", devices.toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**

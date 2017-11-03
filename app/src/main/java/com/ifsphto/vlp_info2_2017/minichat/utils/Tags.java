@@ -8,8 +8,12 @@ import android.content.pm.PackageInfo;
  * Nessa classe se localiza todas as Tags usadas  no App
  */
 public final class Tags {
-
     // TODO: Colocar chamadas TAGS todas aqui nessa classe
     public static final String CHANNEL_DOWNLOAD_ID = new PackageInfo().packageName + ".DOWNLOAD";
     public static final String CHANNEL_DOWNLOAD_NAME = "Downloads";
+    public static final String LOG_TAG = "Minichat";
+
+    public final class Nsd {
+        public static final String TYPE = "_Minichat._tcp.";
+    }
 }
