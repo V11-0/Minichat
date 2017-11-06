@@ -41,7 +41,7 @@ public class Splash extends Activity implements Runnable {
         * com login ativo ou não, e este valor é repassado a um boolean
         */
         SharedPreferences prefs = getSharedPreferences(LoginActivity.LOGIN_PREFS, MODE_PRIVATE);
-        boolean isLogged = prefs.getBoolean(MainPage.PREF_LOG, false);
+        boolean isLogged = prefs.getBoolean("IsLogged", false);
 
         /*
          * Se o usuário já estiver logado, o app se inicia na "Tela inicial"

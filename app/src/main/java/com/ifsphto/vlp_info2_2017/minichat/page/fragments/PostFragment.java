@@ -109,7 +109,7 @@ public class PostFragment extends Fragment {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                 Calendar calendar = Calendar.getInstance();
 
-                String query = "INSERT INTO Post VALUES ('" + prefs
+                String query = "INSERT INTO Host VALUES ('" + prefs
                         .getInt("id", Integer.MIN_VALUE) +
                         "', '" + content + "', '" + sdf.format(calendar.getTime()) + "')";
 

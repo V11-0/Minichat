@@ -19,11 +19,10 @@ public class NSDConnection {
     private NsdManager mNsdManager;
     private NsdManager.DiscoveryListener mDiscoveryListener;
     private NsdManager.RegistrationListener mRegistrationListener;
-    private ServerSocket mServerSocket;
     private int mLocalPort;
     private Context context;
     private NsdServiceInfo si;
-    private ArrayList<String> names = new ArrayList<>();
+    private ArrayList<NsdServiceInfo> names = new ArrayList<>();
 
     public NSDConnection(Context context) {
         this.context = context;
@@ -43,12 +42,12 @@ public class NSDConnection {
         registerService(name);
     }
 
-    public ArrayList<String> getDevices() {
+    public ArrayList<NsdServiceInfo> getDevices() {
         return names;
     }
 
     private void initializeServerSocket() throws IOException {
-        mServerSocket = new ServerSocket(0);
+        ServerSocket mServerSocket = new ServerSocket(0);
         mLocalPort = mServerSocket.getLocalPort();
     }
 
@@ -107,7 +106,7 @@ public class NSDConnection {
                     if (service.getServiceName().equals(si.getServiceName()))
                         Log.i(Tags.LOG_TAG, "Voce se achou");
                     else {
-                        names.add(service.getServiceName());
+                        names.add(service);
                         Log.i(Tags.LOG_TAG, "Dispositivo Encontrado");
                         synchronized (names) {
                             names.notify();

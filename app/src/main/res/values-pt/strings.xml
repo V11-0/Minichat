@@ -5,7 +5,7 @@
     <string name="connected">Conectado!</string>
     <string name="no_connection">Sem conexão, o App não funcionará sem uma conexão à internet</string>
     <string name="title_register_act">Criar Usuário</string>
-    <string name="prompt_login">Nome de usuário ou E-mail</string>
+    <string name="prompt_login">Nome de usuário</string>
     <string name="prompt_user">Nome de usuário</string>
     <string name="prompt_password">Senha</string>
     <string name="prompt_confirm_password">Confirme a senha</string>

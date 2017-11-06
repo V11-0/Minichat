@@ -4,7 +4,7 @@ import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.os.AsyncTask;
+import android.net.nsd.NsdServiceInfo;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
@@ -18,6 +18,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -26,17 +28,10 @@ import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
 import com.ifsphto.vlp_info2_2017.minichat.LoginActivity;
 import com.ifsphto.vlp_info2_2017.minichat.R;
-import com.ifsphto.vlp_info2_2017.minichat.connection.ConnectionClass;
 import com.ifsphto.vlp_info2_2017.minichat.connection.NSDConnection;
-import com.ifsphto.vlp_info2_2017.minichat.object.Post;
 import com.ifsphto.vlp_info2_2017.minichat.settings.SettingsActivity;
 import com.ifsphto.vlp_info2_2017.minichat.utils.Tags;
-import com.ifsphto.vlp_info2_2017.minichat.utils.adapters.PostsAdapter;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 
 /**
@@ -67,9 +62,10 @@ public class MainPage extends AppCompatActivity
     private FloatingActionButton new_msg;
 
     // Listas e Adapters
-    private ListView mPosts;
+    private ListView mDevs;
 
     private NSDConnection nsdConn;
+    private ListAdapter devs;
 
     @Override
     protected void onDestroy() {
@@ -104,8 +100,10 @@ public class MainPage extends AppCompatActivity
         setSupportActionBar(toolbar);
         toolbar.setTitle(getString(R.string.title_activity_user));
 
+        devs = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
+
         // Cria um Array e recupera a ListView
-        mPosts = findViewById(R.id.posts);
+        mDevs = findViewById(R.id.posts);
 
         // Recupera o arquivo SharedPreferences
         prefs = getSharedPreferences(LoginActivity.LOGIN_PREFS, MODE_PRIVATE);
@@ -147,9 +145,8 @@ public class MainPage extends AppCompatActivity
 
         // Seta o nome de usuario e email nos TextView da barra lateral,
         // obtido atráves do arquivo SharedPreferences
-        name = prefs.getString("name", null);
+        name = prefs.getString("name", "Undefined");
         userId.setText(name);
-        userEmail.setText(prefs.getString("email", "Error"));
 
         SwipeRefreshLayout myRefresh = findViewById(R.id.swiperefresh);
         myRefresh.setColorSchemeColors(Color.RED, Color.BLUE, Color.GREEN,
@@ -172,6 +169,19 @@ public class MainPage extends AppCompatActivity
 
         //myRefresh.setRefreshing(true);
         //new GetPosts().execute("");
+
+        mDevs.setOnItemLongClickListener((adapterView, view, i, l) -> {
+            AlertDialog.Builder dlg = new AlertDialog.Builder(MainPage.this);
+            dlg.setTitle("Clicou");
+
+            NsdServiceInfo dev = (NsdServiceInfo) devs.getItem(i);
+
+            dlg.setMessage(dev.getPort() + "\n" + dev.getHost().getHostAddress());
+
+            dlg.create().show();
+
+            return false;
+        });
     }
 
     /**
@@ -250,11 +260,8 @@ public class MainPage extends AppCompatActivity
             } catch (Exception e) {
                 MainPage.this.runOnUiThread(() ->
                         Toast.makeText(getApplicationContext(), R.string.refresh_alr_running, Toast.LENGTH_LONG)
-                        .show());
+                                .show());
             }
-
-            ArrayList<String> dev;
-            ArrayList<Post> p;
 
             while (true) {
 
@@ -266,17 +273,12 @@ public class MainPage extends AppCompatActivity
                     e.printStackTrace();
                 }
 
-                dev = nsdConn.getDevices();
-                p = new ArrayList<>();
+                devs = (ListAdapter) nsdConn.getDevices();
 
-                for (String d : dev)
-                    p.add(new Post(null, d, null));
+                MainPage.this.runOnUiThread(() -> {
+                    mDevs.setAdapter(devs);
+                });
 
-                PostsAdapter adapter = new PostsAdapter(p, MainPage.this,
-                        R.layout.post_item);
-
-                mPosts.setAdapter(null);
-                MainPage.this.runOnUiThread(() -> mPosts.setAdapter(adapter));
                 Log.i(Tags.LOG_TAG, "Adapter setado");
             }
 
