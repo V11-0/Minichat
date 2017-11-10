@@ -4,12 +4,12 @@ import android.content.Context;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
 import android.util.Log;
+import android.widget.ArrayAdapter;
 
 import com.ifsphto.vlp_info2_2017.minichat.utils.Tags;
 
 import java.io.IOException;
 import java.net.ServerSocket;
-import java.util.ArrayList;
 
 /**
  * Created by vinibrenobr11 on 02/11/2017 at 22:23:40
@@ -19,19 +19,35 @@ public class NSDConnection {
     private NsdManager mNsdManager;
     private NsdManager.DiscoveryListener mDiscoveryListener;
     private NsdManager.RegistrationListener mRegistrationListener;
+    private NsdManager.ResolveListener mResolver;
     private int mLocalPort;
     private Context context;
     private NsdServiceInfo si;
-    private ArrayList<NsdServiceInfo> names = new ArrayList<>();
+    private ArrayAdapter<NsdServiceInfo> names;
+    private NsdServiceInfo resolvedNsd = null;
+
+    public final String synchronize = "a";
+    public final String synchronize1 = "b";
 
     public NSDConnection(Context context) {
         this.context = context;
-    }
-
-    public void doIt() throws Exception {
         initializeServerSocket();
         initializeRegistrationListener();
         initializeDiscoveryListener();
+        initializeResolveListener();
+        names = new ArrayAdapter<>(this.context, android.R.layout.simple_list_item_1);
+    }
+
+    public NsdServiceInfo resolve(NsdServiceInfo dev) {
+        mNsdManager.resolveService(dev, mResolver);
+        synchronized (synchronize1) {
+            try {
+                synchronize1.wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        return resolvedNsd;
     }
 
     public void discover() {
@@ -42,13 +58,36 @@ public class NSDConnection {
         registerService(name);
     }
 
-    public ArrayList<NsdServiceInfo> getDevices() {
+    public ArrayAdapter<NsdServiceInfo> getDevices() {
         return names;
     }
 
-    private void initializeServerSocket() throws IOException {
-        ServerSocket mServerSocket = new ServerSocket(0);
+    private void initializeServerSocket() {
+        ServerSocket mServerSocket = null;
+        try {
+            mServerSocket = new ServerSocket(0);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         mLocalPort = mServerSocket.getLocalPort();
+    }
+
+    private void initializeResolveListener() {
+        mResolver = new NsdManager.ResolveListener() {
+            @Override
+            public void onResolveFailed(NsdServiceInfo nsdServiceInfo, int i) {
+                throw new UnsupportedOperationException("Error " + i);
+            }
+
+            @Override
+            public void onServiceResolved(NsdServiceInfo nsdServiceInfo) {
+                resolvedNsd = nsdServiceInfo;
+                Log.i("Service", "Resolvido");
+                synchronized (synchronize1) {
+                    synchronize1.notify();
+                }
+            }
+        };
     }
 
     private void registerService(String name) {
@@ -106,10 +145,10 @@ public class NSDConnection {
                     if (service.getServiceName().equals(si.getServiceName()))
                         Log.i(Tags.LOG_TAG, "Voce se achou");
                     else {
-                        names.add(service);
+                        names.add(service); // FIXME: 07/11/2017 Erros
                         Log.i(Tags.LOG_TAG, "Dispositivo Encontrado");
-                        synchronized (names) {
-                            names.notify();
+                        synchronized (synchronize) {
+                            synchronize.notify();
                         }
                     }
                 }

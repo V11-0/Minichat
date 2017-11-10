@@ -14,12 +14,10 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -30,9 +28,6 @@ import com.ifsphto.vlp_info2_2017.minichat.LoginActivity;
 import com.ifsphto.vlp_info2_2017.minichat.R;
 import com.ifsphto.vlp_info2_2017.minichat.connection.NSDConnection;
 import com.ifsphto.vlp_info2_2017.minichat.settings.SettingsActivity;
-import com.ifsphto.vlp_info2_2017.minichat.utils.Tags;
-
-import java.util.ArrayList;
 
 /**
  * Essa classe é, por enquanto a maior do projeto, ela é a pagina inicial
@@ -65,7 +60,7 @@ public class MainPage extends AppCompatActivity
     private ListView mDevs;
 
     private NSDConnection nsdConn;
-    private ListAdapter devs;
+    private ArrayAdapter<NsdServiceInfo> devs;
 
     @Override
     protected void onDestroy() {
@@ -82,11 +77,8 @@ public class MainPage extends AppCompatActivity
     @Override
     protected void onResume() {
         try {
-            nsdConn.doIt();
             nsdConn.register(name);
-        } catch (Exception e) {
-            Log.i(Tags.LOG_TAG, "Serviço já registrado na rede");
-        }
+        } catch (Exception ignored) {}
         super.onResume();
     }
 
@@ -99,8 +91,6 @@ public class MainPage extends AppCompatActivity
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.setTitle(getString(R.string.title_activity_user));
-
-        devs = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
 
         // Cria um Array e recupera a ListView
         mDevs = findViewById(R.id.posts);
@@ -157,30 +147,18 @@ public class MainPage extends AppCompatActivity
 
         nsdConn = new NSDConnection(this);
 
-        new Thread(() -> {
-            try {
-                nsdConn.doIt();
-                nsdConn.register(name);
+        mDevs.setOnItemClickListener((adapterView, view, i, l) -> {
 
+            try {
+                NsdServiceInfo resolved = nsdConn.resolve(devs.getItem(i));
+                Intent it = new Intent(this, ChatActivity.class);
+                it.putExtra("ServiceInfo", resolved);
+
+                startActivity(it);
             } catch (Exception e) {
                 e.printStackTrace();
+                Toast.makeText(getApplicationContext(), "Deu ruim", Toast.LENGTH_LONG).show();
             }
-        }).start();
-
-        //myRefresh.setRefreshing(true);
-        //new GetPosts().execute("");
-
-        mDevs.setOnItemLongClickListener((adapterView, view, i, l) -> {
-            AlertDialog.Builder dlg = new AlertDialog.Builder(MainPage.this);
-            dlg.setTitle("Clicou");
-
-            NsdServiceInfo dev = (NsdServiceInfo) devs.getItem(i);
-
-            dlg.setMessage(dev.getPort() + "\n" + dev.getHost().getHostAddress());
-
-            dlg.create().show();
-
-            return false;
         });
     }
 
@@ -266,20 +244,19 @@ public class MainPage extends AppCompatActivity
             while (true) {
 
                 try {
-                    synchronized (nsdConn.getDevices()) {
-                        nsdConn.getDevices().wait();
+                    synchronized (nsdConn.synchronize) {
+                        nsdConn.synchronize.wait();
                     }
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
 
-                devs = (ListAdapter) nsdConn.getDevices();
+                devs = nsdConn.getDevices();
 
                 MainPage.this.runOnUiThread(() -> {
                     mDevs.setAdapter(devs);
+                    Toast.makeText(getApplicationContext(), "Adapter setado", Toast.LENGTH_LONG).show();
                 });
-
-                Log.i(Tags.LOG_TAG, "Adapter setado");
             }
 
         }).start();
