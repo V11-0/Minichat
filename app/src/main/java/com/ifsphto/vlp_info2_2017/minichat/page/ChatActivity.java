@@ -1,5 +1,6 @@
 package com.ifsphto.vlp_info2_2017.minichat.page;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -9,6 +10,8 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.ListView;
 
@@ -101,5 +104,32 @@ public class ChatActivity extends AppCompatActivity {
 
         srl.setRefreshing(true);
         //loadMessages();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.chat_menu, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        switch (item.getItemId()) {
+            case R.id.chat_info:
+                showInfoDialog();
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void showInfoDialog() {
+        new Thread(() -> {
+            AlertDialog.Builder dlg = new AlertDialog.Builder(this);
+            dlg.setTitle(dInfo.getHost().getHostAddress() + "|" + dInfo.getHost().getHostName())
+                    .setMessage(dInfo.getPort());
+
+            dlg.create().show();
+        }).start();
     }
 }
