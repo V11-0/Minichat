@@ -124,12 +124,26 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void showInfoDialog() {
-        new Thread(() -> {
-            AlertDialog.Builder dlg = new AlertDialog.Builder(this);
-            dlg.setTitle(dInfo.getHost().getHostAddress() + "|" + dInfo.getHost().getHostName())
-                    .setMessage(dInfo.getPort());
 
-            dlg.create().show();
+        final String[] info = new String[3];
+
+        Thread t = new Thread(() -> {
+            info[0] = dInfo.getHost().getHostAddress();
+            info[1] = String.valueOf(dInfo.getPort());
+        });
+
+        t.start();
+
+        new Thread(() -> {
+            try {
+                t.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            AlertDialog.Builder dlg = new AlertDialog.Builder(this);
+            dlg.setTitle(info[0]).setMessage(info[1]);
+
+            runOnUiThread(() -> dlg.create().show());
         }).start();
     }
 }
