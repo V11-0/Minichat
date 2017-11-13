@@ -22,13 +22,19 @@ public abstract class Channels {
     @RequiresApi(Build.VERSION_CODES.O)
     public static NotificationChannel getDownloadChannel() {
 
-        NotificationChannel d = new NotificationChannel(Tags.CHANNEL_DOWNLOAD_ID
-                , Tags.CHANNEL_DOWNLOAD_NAME, NotificationManager.IMPORTANCE_DEFAULT);
+        NotificationChannel d = new NotificationChannel(Tags.Notification.CHANNEL_DOWNLOAD_ID
+                , Tags.Notification.CHANNEL_DOWNLOAD_NAME, NotificationManager.IMPORTANCE_DEFAULT);
 
         d.setSound(null, null);
         d.enableVibration(false);
         d.enableLights(false);
 
         return d;
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    public static NotificationChannel getMessagesChannel() {
+        return new NotificationChannel(Tags.Notification.CHANNEL_MESSAGE_ID
+        , Tags.Notification.CHANNEL_MESSAGE_NAME, NotificationManager.IMPORTANCE_HIGH);
     }
 }

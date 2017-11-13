@@ -3,6 +3,8 @@ package com.ifsphto.vlp_info2_2017.minichat.page;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.net.nsd.NsdServiceInfo;
 import android.os.Bundle;
@@ -17,6 +19,10 @@ import android.widget.ListView;
 
 import com.ifsphto.vlp_info2_2017.minichat.LoginActivity;
 import com.ifsphto.vlp_info2_2017.minichat.R;
+import com.ifsphto.vlp_info2_2017.minichat.connection.NSDConnection;
+import com.ifsphto.vlp_info2_2017.minichat.database.DbManager;
+import com.ifsphto.vlp_info2_2017.minichat.object.Message;
+import com.ifsphto.vlp_info2_2017.minichat.utils.Tags;
 import com.ifsphto.vlp_info2_2017.minichat.utils.adapters.MessagesAdapter;
 
 /**
@@ -61,9 +67,10 @@ public class ChatActivity extends AppCompatActivity {
         messages_view = findViewById(R.id.messages_view);
 
         dInfo = getIntent().getParcelableExtra("ServiceInfo");
+
         // Obtém o nome dos dois usuários desta conversa
         otherUser = dInfo.getServiceName();
-        hereUser = prefs.getString("name", "Undefined");
+        hereUser = prefs.getString("name", null);
 
         // Criará e setará o nome da pessoa com quem o usuário está conversando na barra superior
         Toolbar toolbar = findViewById(R.id.toolbar_chat);
@@ -76,34 +83,57 @@ public class ChatActivity extends AppCompatActivity {
         // Recupera campo para digitar a mensagem, e o botão para envia-lás
         send_message = findViewById(R.id.send_message);
         FloatingActionButton fab = findViewById(R.id.fab_send_message);
+        fab.setOnClickListener(view -> {
+            try {
+                new Thread(() -> {
+                    try {
+                        NSDConnection.sendMessage(this, hereUser, dInfo
+                            , send_message.getText().toString());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }).start();
 
-        // Coloca os atributos do dialogo para indicar q a mensagem está sendo enviada
-        smpd = new ProgressDialog(this);
-        smpd.setMessage(getString(R.string.sending));
-        smpd.setCancelable(false);
-        smpd.incrementProgressBy(ProgressDialog.STYLE_SPINNER);
+                send_message.setText("");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+        ma = new MessagesAdapter(this, R.id.msgr);
 
-        // Define a ação que será realizada quando a pessoa clicar no botão enviar
-        //fab.setOnClickListener(v -> sendMessage());
-
-        // Coloca os atributos do dialogo para indicar q as mensagens da conversa estão
-        // sendo obtidas
-        gmpd = new ProgressDialog(this);
-        gmpd.setMessage(getString(R.string.get_messages));
-        gmpd.setCancelable(false);
-        gmpd.incrementProgressBy(ProgressDialog.STYLE_SPINNER);
-
-        // Recupera SwipeRefreshLayout e Carrega todas as mensagens do banco externo
         srl = findViewById(R.id.chat_refresh);
         srl.setColorSchemeColors(Color.BLUE, Color.CYAN, Color.MAGENTA, Color.RED, Color.BLACK);
-        //srl.setOnRefreshListener(this::loadMessages);
-
-        fab.setOnClickListener(view -> {
-
-        });
+        srl.setOnRefreshListener(this::loadMessages);
 
         srl.setRefreshing(true);
-        //loadMessages();
+        loadMessages();
+    }
+
+    private void loadMessages() {
+        DbManager dbManager = new DbManager(this);
+        SQLiteDatabase db = dbManager.getWritableDatabase();
+
+        String table = otherUser.replace(" ", "");
+
+        db.execSQL(Tags.Database.CREATE.replace("?", table));
+
+        setMessages(db.rawQuery("SELECT * FROM " + table + " ORDER BY id", null));
+
+        srl.setRefreshing(false);
+    }
+
+    private void setMessages(Cursor cursor) {
+
+        cursor.moveToFirst();
+
+        for (int i = 0; i < cursor.getCount(); i++) {
+
+            boolean isLeft = cursor.getString(1).equals(otherUser);
+            Message m = new Message(isLeft, cursor.getString(2));
+            ma.add(m);
+
+            cursor.moveToNext();
+        }
     }
 
     @Override

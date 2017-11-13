@@ -1,6 +1,7 @@
 package com.ifsphto.vlp_info2_2017.minichat.page;
 
 import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -17,7 +18,9 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -27,6 +30,7 @@ import com.github.clans.fab.FloatingActionMenu;
 import com.ifsphto.vlp_info2_2017.minichat.LoginActivity;
 import com.ifsphto.vlp_info2_2017.minichat.R;
 import com.ifsphto.vlp_info2_2017.minichat.connection.NSDConnection;
+import com.ifsphto.vlp_info2_2017.minichat.services.MessageService;
 import com.ifsphto.vlp_info2_2017.minichat.settings.SettingsActivity;
 
 /**
@@ -66,20 +70,6 @@ public class MainPage extends AppCompatActivity
     protected void onDestroy() {
         nsdConn.finishEverything();
         super.onDestroy();
-    }
-
-    @Override
-    protected void onStop() {
-        nsdConn.finishEverything();
-        super.onStop();
-    }
-
-    @Override
-    protected void onResume() {
-        try {
-            nsdConn.register(name);
-        } catch (Exception ignored) {}
-        super.onResume();
     }
 
     @Override
@@ -146,6 +136,7 @@ public class MainPage extends AppCompatActivity
         });
 
         nsdConn = new NSDConnection(this);
+        nsdConn.register(name);
 
         mDevs.setOnItemClickListener((adapterView, view, i, l) -> {
 
@@ -160,6 +151,27 @@ public class MainPage extends AppCompatActivity
                 Toast.makeText(getApplicationContext(), "Deu ruim", Toast.LENGTH_LONG).show();
             }
         });
+    }
+
+    public void nameHasCollided() {
+
+        EditText edt_name = new EditText(this);
+        edt_name.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT
+                , ViewGroup.LayoutParams.MATCH_PARENT));
+
+        AlertDialog.Builder new_name = new AlertDialog.Builder(this);
+        new_name.setTitle("Opa, deu merda").setMessage("Há alguem com o mesmo nome na rede. É " +
+                "melhor muda-lo: ").setPositiveButton("OK", (dialogInterface, i) -> {
+
+            String naime = edt_name.getText().toString();
+
+            nsdConn.register(naime);
+
+            SharedPreferences.Editor ed = prefs.edit();
+            ed.putString("name", naime);
+            ed.apply();
+
+        }).setView(edt_name).create().show();
     }
 
     /**
@@ -253,12 +265,14 @@ public class MainPage extends AppCompatActivity
 
                 devs = nsdConn.getDevices();
 
-                MainPage.this.runOnUiThread(() -> {
-                    mDevs.setAdapter(devs);
-                    Toast.makeText(getApplicationContext(), "Adapter setado", Toast.LENGTH_LONG).show();
-                });
+                if (devs.getCount() != mDevs.getCount()) {
+                    MainPage.this.runOnUiThread(() -> {
+                        mDevs.setAdapter(devs);
+                        Toast.makeText(getApplicationContext(), "Adapter setado"
+                                , Toast.LENGTH_LONG).show();
+                    });
+                }
             }
-
         }).start();
     }
 

@@ -1,15 +1,25 @@
 package com.ifsphto.vlp_info2_2017.minichat.connection;
 
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
 import android.util.Log;
 import android.widget.ArrayAdapter;
 
+import com.ifsphto.vlp_info2_2017.minichat.database.DbManager;
+import com.ifsphto.vlp_info2_2017.minichat.page.MainPage;
+import com.ifsphto.vlp_info2_2017.minichat.services.MessageService;
 import com.ifsphto.vlp_info2_2017.minichat.utils.Tags;
 
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.net.Socket;
 
 /**
  * Created by vinibrenobr11 on 02/11/2017 at 22:23:40
@@ -21,21 +31,21 @@ public class NSDConnection {
     private NsdManager.RegistrationListener mRegistrationListener;
     private NsdManager.ResolveListener mResolver;
     private int mLocalPort;
-    private Context context;
+    private MainPage activity;
     private NsdServiceInfo si;
     private ArrayAdapter<NsdServiceInfo> names;
     private NsdServiceInfo resolvedNsd = null;
 
     public final String synchronize = "a";
-    public final String synchronize1 = "b";
+    private final String synchronize1 = "b";
 
-    public NSDConnection(Context context) {
-        this.context = context;
+    public NSDConnection(MainPage activity) {
+        this.activity = activity;
         initializeServerSocket();
         initializeRegistrationListener();
         initializeDiscoveryListener();
         initializeResolveListener();
-        names = new ArrayAdapter<>(this.context, android.R.layout.simple_list_item_1);
+        names = new ArrayAdapter<>(this.activity, android.R.layout.simple_list_item_1);
     }
 
     public NsdServiceInfo resolve(NsdServiceInfo dev) {
@@ -97,9 +107,10 @@ public class NSDConnection {
         si.setServiceType(Tags.Nsd.TYPE);
         si.setPort(mLocalPort);
 
-        mNsdManager = (NsdManager) context.getSystemService(Context.NSD_SERVICE);
+        mNsdManager = (NsdManager) activity.getSystemService(Context.NSD_SERVICE);
 
         mNsdManager.registerService(si, NsdManager.PROTOCOL_DNS_SD, mRegistrationListener);
+        this.startNewMessagesListener();
     }
 
     private void initializeRegistrationListener() {
@@ -117,6 +128,11 @@ public class NSDConnection {
 
             @Override
             public void onServiceRegistered(NsdServiceInfo nsdServiceInfo) {
+                if (!si.getServiceName().equals(nsdServiceInfo.getServiceName())) {
+                    Log.i("Error", "Deu ruim no nome");
+                    finishEverything();
+                    activity.nameHasCollided();
+                }
                 Log.i(Tags.LOG_TAG, "Sucesso ao registrar serviço");
             }
 
@@ -145,7 +161,7 @@ public class NSDConnection {
                     if (service.getServiceName().equals(si.getServiceName()))
                         Log.i(Tags.LOG_TAG, "Voce se achou");
                     else {
-                        names.add(service); // FIXME: 07/11/2017 Erros
+                        activity.runOnUiThread(() -> names.add(service));
                         Log.i(Tags.LOG_TAG, "Dispositivo Encontrado");
                         synchronized (synchronize) {
                             synchronize.notify();
@@ -191,5 +207,35 @@ public class NSDConnection {
         } catch (Exception e) {
             Log.i(Tags.LOG_TAG, "RegistrationListener já Estava parado");
         }
+    }
+
+    private void startNewMessagesListener() {
+        Intent service = new Intent(activity, MessageService.class);
+        service.putExtra("Host", si);
+
+        activity.startService(service);
+    }
+
+    public static void sendMessage(Context context, String you, NsdServiceInfo dest, String msg)
+            throws Exception {
+
+        String table = dest.getServiceName().replace(" ", "");
+
+        Socket socket = new Socket(dest.getHost(), dest.getPort()+1);
+        DataOutputStream dOut = new DataOutputStream(socket.getOutputStream());
+
+        dOut.writeUTF(you + Tags.Database.SPLIT_REGEX + msg);
+        dOut.flush();
+
+        DbManager manager = new DbManager(context);
+        SQLiteDatabase db = manager.getWritableDatabase();
+
+        db.execSQL(Tags.Database.CREATE.replace("?", table));
+
+        ContentValues cv = new ContentValues();
+        cv.put(Tags.Database.MSG_COLUMN_AUTHOR, you);
+        cv.put(Tags.Database.MSG_COLUMN_MESSAGE, msg);
+
+        db.insert(table, null, cv);
     }
 }

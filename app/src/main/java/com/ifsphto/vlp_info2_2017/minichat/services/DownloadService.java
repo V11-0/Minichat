@@ -51,7 +51,7 @@ public class DownloadService extends IntentService {
 
         // Construtor de notificações
         final NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this,
-                Tags.CHANNEL_DOWNLOAD_ID);
+                Tags.Notification.CHANNEL_DOWNLOAD_ID);
 
         // Define textos e ícones que a notificação terá
         mBuilder.setContentTitle(getString(R.string.updating)).setSmallIcon(android.R.drawable.stat_sys_download)
