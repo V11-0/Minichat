@@ -66,6 +66,9 @@ public class MainPage extends AppCompatActivity
     private NSDConnection nsdConn;
     private ArrayAdapter<NsdServiceInfo> devs;
 
+    private TextView userId;
+    private TextView userEmail;
+
     @Override
     protected void onDestroy() {
         nsdConn.finishEverything();
@@ -120,13 +123,12 @@ public class MainPage extends AppCompatActivity
         View headerView = navigationView.getHeaderView(0);
 
         // Recupera os TextView que estão na imagem da barra lateral
-        TextView userId = headerView.findViewById(R.id.UserId);
-        TextView userEmail = headerView.findViewById(R.id.UserEmail);
+        userId = headerView.findViewById(R.id.UserId);
+        userEmail = headerView.findViewById(R.id.UserEmail);
 
         // Seta o nome de usuario e email nos TextView da barra lateral,
         // obtido atráves do arquivo SharedPreferences
         name = prefs.getString("name", "Undefined");
-        userId.setText(name);
 
         SwipeRefreshLayout myRefresh = findViewById(R.id.swiperefresh);
         myRefresh.setColorSchemeColors(Color.RED, Color.BLUE, Color.GREEN,
@@ -341,5 +343,12 @@ public class MainPage extends AppCompatActivity
         if (resultCode == 52) {
             Toast.makeText(this, R.string.post_sucess, Toast.LENGTH_LONG).show();
         }
+    }
+
+    public void setDrawerText(String name, int port) {
+        runOnUiThread(() -> {
+            userId.setText(name);
+            userEmail.setText(String.valueOf(port));
+        });
     }
 }

@@ -45,13 +45,6 @@ public class ChatActivity extends AppCompatActivity {
     // ListView para exibir as Mensagens
     private ListView messages_view;
 
-    /*
-     ProgressDialog que dizem ao usuário que as mensagens
-     estão sendo enviadas ou sendo obtidas
-      */
-    private ProgressDialog gmpd;
-    private ProgressDialog smpd;
-
     private SwipeRefreshLayout srl;
 
     private NsdServiceInfo dInfo;

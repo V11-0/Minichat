@@ -16,6 +16,7 @@ import com.ifsphto.vlp_info2_2017.minichat.utils.Tags;
 import com.ifsphto.vlp_info2_2017.minichat.utils.notification.Channels;
 
 import java.io.BufferedReader;
+import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
@@ -40,8 +41,8 @@ public class MessageService extends IntentService {
 
         ServerSocket serverSocket = null;
 
+        Log.d("Host", thisHost.toString());
         try {
-            Log.d("Host", thisHost.toString());
             serverSocket = new ServerSocket(thisHost.getPort()+1);
         } catch (IOException e) {
             e.printStackTrace();
@@ -54,14 +55,14 @@ public class MessageService extends IntentService {
                     Socket client = serverSocket.accept();
                     Log.d(Tags.LOG_TAG, "Passou do accept");
 
-                    BufferedReader in = new BufferedReader(
-                            new InputStreamReader(client.getInputStream()));
+                    DataInputStream in = new DataInputStream(client.getInputStream());
 
                     String all;
 
-                    Log.i(Tags.LOG_TAG, "Criado Buffer");
+                    all = in.readUTF();
 
-                    while((all = in.readLine()) != null) {
+                    Log.i(Tags.LOG_TAG, all);
+
                         Log.i(Tags.LOG_TAG, "Criado Buffer");
 
                         DbManager manager = new DbManager(getApplicationContext());
@@ -70,8 +71,11 @@ public class MessageService extends IntentService {
                         Log.i(Tags.LOG_TAG, "Database recuperada");
                         ContentValues cv = new ContentValues();
 
-                        String[] data = all.split(Tags.Database.SPLIT_REGEX);
-                        db.execSQL(Tags.Database.CREATE.replace("?", data[0]));
+                        String regex = Tags.Database.SPLIT_REGEX;
+                        String[] data = all.split(regex);
+
+                        String query = Tags.Database.CREATE.replace("?", data[0]);
+                        db.execSQL(query);
 
                         cv.put(Tags.Database.MSG_COLUMN_AUTHOR, data[0]);
                         cv.put(Tags.Database.MSG_COLUMN_MESSAGE, data[1]);
@@ -79,9 +83,9 @@ public class MessageService extends IntentService {
                         Log.d("é nulo?", data[0]);
 
                         db.insert(data[0].replace(" ", ""), null, cv);
+                        db.close();
 
                         sendNotification(data[0], data[1]);
-                    }
 
                 }
             } catch(Exception e){

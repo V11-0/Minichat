@@ -26,7 +26,7 @@ public final class Tags {
         public static final String MSG_DATABASE_NAME = "Messages";
         public static final String MSG_COLUMN_AUTHOR = "author";
         public static final String MSG_COLUMN_MESSAGE = "message";
-        public static final String SPLIT_REGEX = "[|]";
+        public static final String SPLIT_REGEX = "QWERTYFOSIAFDSWOIEIJKIHJBEFWH";
         public static final String CREATE = "CREATE TABLE IF NOT EXISTS ? (" +
                 "id INTEGER PRIMARY KEY AUTOINCREMENT, Author VARCHAR(500) NOT NULL, Message VARCHAR(5000))";
     }

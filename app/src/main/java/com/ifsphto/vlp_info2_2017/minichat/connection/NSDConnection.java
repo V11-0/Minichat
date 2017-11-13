@@ -1,7 +1,5 @@
 package com.ifsphto.vlp_info2_2017.minichat.connection;
 
-import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -132,7 +130,8 @@ public class NSDConnection {
                     Log.i("Error", "Deu ruim no nome");
                     finishEverything();
                     activity.nameHasCollided();
-                }
+                } else
+                    activity.setDrawerText(nsdServiceInfo.getServiceName(), nsdServiceInfo.getPort());
                 Log.i(Tags.LOG_TAG, "Sucesso ao registrar serviço");
             }
 
@@ -223,8 +222,9 @@ public class NSDConnection {
 
         Socket socket = new Socket(dest.getHost(), dest.getPort()+1);
         DataOutputStream dOut = new DataOutputStream(socket.getOutputStream());
+        String regex = Tags.Database.SPLIT_REGEX;
 
-        dOut.writeUTF(you + Tags.Database.SPLIT_REGEX + msg);
+        dOut.writeUTF(you + regex + msg);
         dOut.flush();
 
         DbManager manager = new DbManager(context);
@@ -237,5 +237,8 @@ public class NSDConnection {
         cv.put(Tags.Database.MSG_COLUMN_MESSAGE, msg);
 
         db.insert(table, null, cv);
+
+        db.close();
+        dOut.close();
     }
 }
