@@ -34,7 +34,14 @@ public abstract class Channels {
 
     @RequiresApi(Build.VERSION_CODES.O)
     public static NotificationChannel getMessagesChannel() {
-        return new NotificationChannel(Tags.Notification.CHANNEL_MESSAGE_ID
-        , Tags.Notification.CHANNEL_MESSAGE_NAME, NotificationManager.IMPORTANCE_HIGH);
+
+        NotificationChannel c = new NotificationChannel(Tags.Notification.CHANNEL_MESSAGE_ID
+                , Tags.Notification.CHANNEL_MESSAGE_NAME, NotificationManager.IMPORTANCE_HIGH);
+
+        c.enableLights(true);
+        c.enableVibration(true);
+        c.shouldVibrate();
+
+        return c;
     }
 }

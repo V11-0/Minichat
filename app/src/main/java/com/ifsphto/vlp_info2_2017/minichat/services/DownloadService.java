@@ -91,23 +91,21 @@ public class DownloadService extends IntentService {
             // Thread que gerencia o progresso de download na notificação
             mProgress = new Thread(() -> {
 
-                double now = 0;
+                double now;
 
                 while (!Thread.currentThread().getName().equals("f")) {
 
+                    try {
+                        Thread.sleep(2000);
+                    } catch (InterruptedException ignored) {}
+
+                    now = file.length();
                     double prog = (now / all) * 100;
 
                     mBuilder.setProgress(100, (int) prog, false);
                     mBuilder.setContentText(getString(R.string.downloading, prog));
 
                     mNotifierManager.notify(0, mBuilder.build());
-
-                    try {
-                        Thread.sleep(2000);
-                    } catch (InterruptedException ignored) {
-                    }
-
-                    now = file.length();
                 }
             });
 
@@ -174,8 +172,7 @@ public class DownloadService extends IntentService {
                 try {
                     mProgress.setName("f");
                     Thread.sleep(3000);
-                } catch (InterruptedException ignored) {
-                }
+                } catch (InterruptedException ignored) {}
             }
 
             mBuilder.setContentText("Toque para mais detalhes")

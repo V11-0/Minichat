@@ -16,7 +16,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.ifsphto.vlp_info2_2017.minichat.connection.ConnectionClass;
-import com.ifsphto.vlp_info2_2017.minichat.utils.security.Encrypt;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -25,6 +24,7 @@ import java.sql.Statement;
 /**
  * Activity para criar um novo usuário no MySQL<br>
  *     Ela é bem parecida com {@link LoginActivity}
+ * @deprecated porque o usuário não precisa mais fazer login
  */
 public class RegistrationActivity extends AppCompatActivity {
 
@@ -317,7 +317,6 @@ public class RegistrationActivity extends AppCompatActivity {
 
                 user_name = user_name.replace("'", "''");
                 email = email.replace("'", "''");
-                password = Encrypt.encryptPass(password);
 
                 // Verifica se já existe um usuário com o mesmo nome
                 String query = "SELECT * FROM User WHERE Name ='" + user_name + "'";

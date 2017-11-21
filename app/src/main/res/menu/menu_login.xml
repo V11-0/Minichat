@@ -5,6 +5,7 @@
     <item android:title="@string/title_register_act"
         android:id="@+id/menu_new_user"
         android:icon="@drawable/ic_add_white_24dp"
+        android:visible="false"
         app:showAsAction="ifRoom" />
 
     <item android:title="@string/title_activity_settings"

@@ -2,7 +2,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <PreferenceCategory android:title="@string/colors_lit">
-        <PreferenceScreen android:title="@string/app_colors">
+        <PreferenceScreen android:title="@string/app_colors"
+            android:icon="@drawable/ic_color_lens_black_24dp">
 
             <PreferenceCategory android:title="@string/all_app_colors">
 
@@ -24,39 +25,80 @@
 
             </PreferenceCategory>
 
-            <PreferenceCategory android:title="@string/post_colors">
+            <PreferenceCategory android:title="Gradiente do menu lateral">
 
                 <com.flask.colorpicker.ColorPickerPreference
                     android:defaultValue="-16777216"
-                    android:key="PostContent"
-                    android:title="@string/posts_text"
+                    android:key="GradStart"
+                    android:title="Cor Inicial"
+                    android:summary="Cor de Início do Gradiente"
                     app:initialColor="-16777216"
                     app:lightnessSlider="true" />
 
                 <com.flask.colorpicker.ColorPickerPreference
                     android:defaultValue="-16777216"
-                    android:key="PostAuthor"
-                    android:title="@string/posts_author"
+                    android:key="GradCenter"
+                    android:title="Cor Central"
+                    android:summary="Cor Que fica no Centro do Gradiente"
                     app:initialColor="-16777216"
                     app:lightnessSlider="true" />
 
                 <com.flask.colorpicker.ColorPickerPreference
                     android:defaultValue="-16777216"
-                    android:key="PostDate"
-                    android:title="@string/posts_data"
+                    android:key="GradEnd"
+                    android:title="Cor Final"
+                    android:summary="Cor que encerra o gradiente"
                     app:initialColor="-16777216"
+                    app:lightnessSlider="true" />
+
+                <ListPreference
+                    android:entries="@array/gradient_orientation_string"
+                    android:entryValues="@array/gradient_orientation_values"
+                    android:key="GradOrientation"
+                    android:defaultValue="1"
+                    android:title="Orientação do Gradiente"
+                    android:summary="Decida em qual direção o gradiente de cores será exibido" />
+
+            </PreferenceCategory>
+
+            <PreferenceCategory android:title="Em Conversas">
+
+                <com.flask.colorpicker.ColorPickerPreference
+                    android:title="Texto da mensagem"
+                    android:defaultValue="-16777216"
+                    android:key="ChatMessageText"
+                    android:summary="Cor em que todas as mensagens de uma conversa serão exibidas"
+                    app:initialColor="-16777216"
+                    app:lightnessSlider="true" />
+
+                <com.flask.colorpicker.ColorPickerPreference
+                    android:title="Fundo do balão de mensagem"
+                    android:defaultValue="-13553358"
+                    android:key="ChatMessageBackground"
+                    android:summary="Cor em que o fundo das mensagens de uma conversa serão exibidas"
+                    app:initialColor="-13553358"
                     app:lightnessSlider="true" />
 
             </PreferenceCategory>
 
+
         </PreferenceScreen>
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Sons">
+
+        <RingtonePreference android:title="Som de nova mensagem"
+            android:key="pref_sound" android:icon="@drawable/ic_volume_up_black_24dp"
+            android:defaultValue="content://settings/system/notification_sound" />
+
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/about">
 
         <Preference
             android:key="pref_update"
-            android:title="@string/pref_update_title">
+            android:title="@string/pref_update_title"
+            android:icon="@drawable/ic_update_black_24dp">
         </Preference>
 
     </PreferenceCategory>

@@ -3,7 +3,6 @@ package com.ifsphto.vlp_info2_2017.minichat.settings;
 import android.app.AlertDialog;
 import android.os.Bundle;
 
-
 /**
  * Created by vinibrenobr11 on 20/08/2017 at 15:40:36<br></br>
  *

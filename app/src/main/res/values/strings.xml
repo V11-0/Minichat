@@ -32,7 +32,6 @@
 
     <string name="title_activity_user">Home Page</string>
     <string name="drawer_messages">Messages</string>
-    <string name="home">Home</string>
     <string name="account_section">Account Options</string>
 
     <string name="confirm_ald_title">Do you want to Log out?</string>
@@ -95,7 +94,7 @@
     <string name="accent_color_pref">Accent Color</string>
     <string name="accent_color_summ">Choose the Accent color in the App</string>
     <string name="updating">Updating</string>
-    <string name="downloading">Downloading Update File: %.1f%%</string>
+    <string name="downloading">Downloading: %.1f%%</string>
     <string name="down_success">File Downloaded</string>
     <string name="login_incorrect">Incorrect Credencials</string>
     <string name="all_app_colors">All Application Colors</string>
@@ -117,23 +116,22 @@
     <string name="social" translatable="false">Social</string>
     <string name="verifying">Verifying for Updates</string>
 
-    <string-array name="months">
-        <item>January</item>
-        <item>February</item>
-        <item>March</item>
-        <item>April</item>
-        <item>May</item>
-        <item>June</item>
-        <item>July</item>
-        <item>August</item>
-        <item>September</item>
-        <item>October</item>
-        <item>November</item>
-        <item>December</item>
+    <string name="post_fomated">%s of %s at %s</string>
+    <string name="refresh_alr_running">Already Running</string>
+    <string name="title_discover">Available People</string>
+    <string name="title_discover_drawer">Discover</string>
+    <string name="menu_refresh_title">Reload Available People</string>
+
+    <string-array name="gradient_orientation_string">
+        <item>Bottom-Left to Top-Right</item>
+        <item>Top to Bottom</item>
+        <item>Left to Right</item>
     </string-array>
 
-    <string name="post_fomated">%s of %s at %s</string>
-    <string name="menu_refresh_title">Recarregar pessoas disponíveis</string>
-    <string name="refresh_alr_running">Already Running</string>
+    <string-array name="gradient_orientation_values">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
 
 </resources>

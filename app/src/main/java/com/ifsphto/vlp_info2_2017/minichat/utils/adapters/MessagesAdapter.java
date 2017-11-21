@@ -1,6 +1,8 @@
 package com.ifsphto.vlp_info2_2017.minichat.utils.adapters;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import com.ifsphto.vlp_info2_2017.minichat.BuildConfig;
 import com.ifsphto.vlp_info2_2017.minichat.R;
 import com.ifsphto.vlp_info2_2017.minichat.object.Message;
 
@@ -24,6 +27,8 @@ public class MessagesAdapter extends ArrayAdapter<Message> {
 
     // ArrayList com todas as mensagens dessa conversa
     private List<Message> chatMessageList = new ArrayList<>();
+    private int textColor;
+    private int backgroundColor;
 
     /**
      * Construtor
@@ -33,6 +38,11 @@ public class MessagesAdapter extends ArrayAdapter<Message> {
      */
     public MessagesAdapter(Context context, int textViewResourceId) {
         super(context, textViewResourceId);
+        SharedPreferences prefs = context.getSharedPreferences(BuildConfig.APPLICATION_ID +
+                "_preferences", Context.MODE_PRIVATE);
+
+        textColor = prefs.getInt("ChatMessageText", Color.BLACK);
+        backgroundColor = prefs.getInt("ChatMessageBackground", -13553358);
     }
 
     /**
@@ -91,6 +101,9 @@ public class MessagesAdapter extends ArrayAdapter<Message> {
         TextView chatText = row.findViewById(R.id.msgr);
         // Obtem o conteúdo da Mensagem
         chatText.setText(chatMessageObj.getMessage());
+        chatText.setTextColor(textColor);
+        chatText.setBackgroundColor(backgroundColor);
+
         // Retorna a View
         return row;
     }

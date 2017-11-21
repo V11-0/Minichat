@@ -1,14 +1,12 @@
 package com.ifsphto.vlp_info2_2017.minichat.page;
 
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.SharedPreferences;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.net.nsd.NsdServiceInfo;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -22,8 +20,9 @@ import com.ifsphto.vlp_info2_2017.minichat.R;
 import com.ifsphto.vlp_info2_2017.minichat.connection.NSDConnection;
 import com.ifsphto.vlp_info2_2017.minichat.database.DbManager;
 import com.ifsphto.vlp_info2_2017.minichat.object.Message;
-import com.ifsphto.vlp_info2_2017.minichat.utils.Tags;
 import com.ifsphto.vlp_info2_2017.minichat.utils.adapters.MessagesAdapter;
+
+import java.util.ArrayList;
 
 /**
  * Classe da tela de conversa, onde é possível enviar e receber mensagens enviadas diretamente
@@ -38,9 +37,6 @@ public class ChatActivity extends AppCompatActivity {
     private EditText send_message;
     // Adaptador para posicionar as mensagens corretamente na tela
     private MessagesAdapter ma;
-
-    // Mensagem
-    private String message;
 
     // ListView para exibir as Mensagens
     private ListView messages_view;
@@ -77,22 +73,9 @@ public class ChatActivity extends AppCompatActivity {
         send_message = findViewById(R.id.send_message);
         FloatingActionButton fab = findViewById(R.id.fab_send_message);
         fab.setOnClickListener(view -> {
-            try {
-                new Thread(() -> {
-                    try {
-                        NSDConnection.sendMessage(this, hereUser, dInfo
-                            , send_message.getText().toString());
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }).start();
-
-                send_message.setText("");
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            sendMessage(send_message.getText().toString());
+            send_message.setText("");
         });
-        ma = new MessagesAdapter(this, R.id.msgr);
 
         srl = findViewById(R.id.chat_refresh);
         srl.setColorSchemeColors(Color.BLUE, Color.CYAN, Color.MAGENTA, Color.RED, Color.BLACK);
@@ -102,36 +85,39 @@ public class ChatActivity extends AppCompatActivity {
         loadMessages();
     }
 
+    private void sendMessage(final String s) {
+        new Thread(() -> {
+            try {
+                NSDConnection.sendMessage(getApplicationContext(), hereUser, dInfo, s);
+                runOnUiThread(this::loadMessages);
+            } catch (Exception e) {
+                e.printStackTrace();
+                runOnUiThread(() -> Snackbar.make(messages_view, "Ocorreu um erro", Snackbar.LENGTH_LONG).show());
+            }
+        }).start();
+    }
+
     private void loadMessages() {
-        DbManager dbManager = new DbManager(this);
-        SQLiteDatabase db = dbManager.getWritableDatabase();
 
-        String table = otherUser.replace(" ", "");
+        DbManager dbManager = new DbManager(this, otherUser.replace(" ", ""));
 
-        db.execSQL(Tags.Database.CREATE.replace("?", table));
-
-        setMessages(db.rawQuery("SELECT * FROM " + table + " ORDER BY id", null));
+        ma = new MessagesAdapter(this, R.id.msgr);
+        setMessages(dbManager.select(otherUser));
 
         srl.setRefreshing(false);
     }
 
-    private void setMessages(Cursor cursor) {
+    private void setMessages(ArrayList<Message> messages) {
 
-        cursor.moveToFirst();
-
-        for (int i = 0; i < cursor.getCount(); i++) {
-
-            boolean isLeft = cursor.getString(1).equals(otherUser);
-            Message m = new Message(isLeft, cursor.getString(2));
+        for (Message m : messages)
             ma.add(m);
 
-            cursor.moveToNext();
-        }
+        messages_view.setAdapter(ma);
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.chat_menu, menu);
+        getMenuInflater().inflate(R.menu.menu_chat, menu);
         return super.onCreateOptionsMenu(menu);
     }
 

@@ -2,23 +2,24 @@ package com.ifsphto.vlp_info2_2017.minichat.services;
 
 import android.app.IntentService;
 import android.app.NotificationManager;
-import android.content.ContentValues;
+import android.app.PendingIntent;
 import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.net.nsd.NsdServiceInfo;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.TaskStackBuilder;
 import android.util.Log;
 
+import com.ifsphto.vlp_info2_2017.minichat.BuildConfig;
 import com.ifsphto.vlp_info2_2017.minichat.R;
 import com.ifsphto.vlp_info2_2017.minichat.database.DbManager;
+import com.ifsphto.vlp_info2_2017.minichat.page.ChatActivity;
 import com.ifsphto.vlp_info2_2017.minichat.utils.Tags;
 import com.ifsphto.vlp_info2_2017.minichat.utils.notification.Channels;
 
-import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -42,6 +43,7 @@ public class MessageService extends IntentService {
         ServerSocket serverSocket = null;
 
         Log.d("Host", thisHost.toString());
+
         try {
             serverSocket = new ServerSocket(thisHost.getPort()+1);
         } catch (IOException e) {
@@ -51,42 +53,40 @@ public class MessageService extends IntentService {
         if (serverSocket != null) {
             try {
                 while (true) {
-                    Log.d(Tags.LOG_TAG, "Serviço travado em accept");
                     Socket client = serverSocket.accept();
-                    Log.d(Tags.LOG_TAG, "Passou do accept");
 
-                    DataInputStream in = new DataInputStream(client.getInputStream());
+                    new Thread(() -> {
+                        Log.i(Tags.LOG_TAG, "Recebido");
 
-                    String all;
+                        Socket client_clone = client;
 
-                    all = in.readUTF();
+                        String name = null;
+                        String msg = null;
+                        try {
+                            DataInputStream in = new DataInputStream(client_clone.getInputStream());
 
-                    Log.i(Tags.LOG_TAG, all);
+                            name = in.readUTF();
+                            msg = in.readUTF();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
 
-                        Log.i(Tags.LOG_TAG, "Criado Buffer");
+                        DbManager manager = new DbManager(getApplicationContext()
+                                , name.replace(" ", ""));
 
-                        DbManager manager = new DbManager(getApplicationContext());
-                        SQLiteDatabase db = manager.getWritableDatabase();
+                        NsdServiceInfo client_nsd = new NsdServiceInfo();
+                        client_nsd.setPort(client_clone.getPort());
+                        client_nsd.setServiceName(name);
+                        client_nsd.setHost(client_clone.getInetAddress());
+                        client_nsd.setServiceType(Tags.Nsd.TYPE);
 
-                        Log.i(Tags.LOG_TAG, "Database recuperada");
-                        ContentValues cv = new ContentValues();
+                        // TODO: 20/11/2017 Notificação com a porta correta, ou descobrir na tela de chat
 
-                        String regex = Tags.Database.SPLIT_REGEX;
-                        String[] data = all.split(regex);
-
-                        String query = Tags.Database.CREATE.replace("?", data[0]);
-                        db.execSQL(query);
-
-                        cv.put(Tags.Database.MSG_COLUMN_AUTHOR, data[0]);
-                        cv.put(Tags.Database.MSG_COLUMN_MESSAGE, data[1]);
-
-                        Log.d("é nulo?", data[0]);
-
-                        db.insert(data[0].replace(" ", ""), null, cv);
-                        db.close();
-
-                        sendNotification(data[0], data[1]);
-
+                        if (manager.insert(name, msg))
+                            sendNotification(name, msg, client_nsd);
+                        else
+                            Log.e(Tags.LOG_TAG, "Erro ao salvar msg recebida no sqlite");
+                    }).start();
                 }
             } catch(Exception e){
                 e.printStackTrace();
@@ -95,9 +95,20 @@ public class MessageService extends IntentService {
             throw new NullPointerException("Socket é nulo");
     }
 
-    private void sendNotification(String name, String msg) {
+    private void sendNotification(String name, String msg, NsdServiceInfo who) {
 
-        Log.i("Notificacao", "Chegou aqui");
+        Uri sound = Uri.parse(getApplicationContext().getSharedPreferences(BuildConfig.APPLICATION_ID + "_preferences", 0)
+                .getString("pref_sound", ""));
+
+        PendingIntent resultIntent;
+        TaskStackBuilder mTask = TaskStackBuilder.create(getBaseContext());
+        Intent it = new Intent(this, ChatActivity.class);
+        it.putExtra("ServiceInfo", who);
+
+        mTask.addNextIntent(it);
+        resultIntent = mTask.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        Log.i("Notificacao", "Enviou Notificaçaõ");
 
         NotificationManager ntm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
@@ -109,7 +120,10 @@ public class MessageService extends IntentService {
 
         builder.setContentTitle("Nova Mensagem de " + name)
                 .setContentText(msg)
-                .setSmallIcon(R.drawable.ic_chat_black_24dp);
+                .setSmallIcon(R.drawable.ic_chat_white_24dp)
+                .setSound(sound)
+                .setVibrate(new long[] {1000, 1000, 1000, 1000})
+                .setContentIntent(resultIntent);
 
         ntm.notify(2, builder.build());
     }
