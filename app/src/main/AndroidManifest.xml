@@ -29,16 +29,6 @@
             android:label="@string/title_activity_main"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".RegistrationActivity"
-            android:label="@string/title_register_act"
-            android:parentActivityName=".LoginActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.ifsphto.vlp_info2_2017.minichat.LoginActivity" />
-        </activity>
-        <activity
             android:name=".page.MainPage"
             android:label="@string/drawer_messages"
             android:theme="@style/AppTheme.NoActionBar" />
@@ -56,17 +46,16 @@
             android:label="@string/title_activity_settings" />
         <activity
             android:name=".page.ChatActivity"
-            android:theme="@style/Chat">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.ifsphto.vlp_info2_2017.minichat.page.MainPage" />
-        </activity>
+            android:theme="@style/Chat" />
 
         <service android:name=".services.DownloadService"
-            android:enabled="true" />
+            android:enabled="true" android:exported="false" />
 
         <service android:name=".services.MessageService"
-            android:enabled="true" />
+            android:enabled="true" android:exported="false"/>
+
+        <service android:name=".services.NsdBroadcastService"
+            android:enabled="true" android:exported="false" />
 
     </application>
 

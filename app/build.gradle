@@ -7,12 +7,12 @@ android {
         applicationId "com.ifsphto.vlp_info2_2017.minichat"
         minSdkVersion 16
         targetSdkVersion 27
-        versionName '0.6.4'
+        versionName '0.6.5'
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
         debug {

@@ -121,10 +121,10 @@
     <string name="refresh_alr_running">Já descobrindo</string>
     <string name="title_discover_drawer">Descobrir</string>
 
-    <array name="gradient_orientation_string">
+    <string-array name="gradient_orientation_string">
         <item>Inferior Esquerdo para Superior Direito</item>
         <item>De cima para Baixo</item>
         <item>Esquerda para Direita</item>
-    </array>
+    </string-array>
 
 </resources>

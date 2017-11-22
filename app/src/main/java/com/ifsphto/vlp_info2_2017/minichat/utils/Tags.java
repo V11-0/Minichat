@@ -10,6 +10,7 @@ import com.ifsphto.vlp_info2_2017.minichat.BuildConfig;
 public final class Tags {
 
     public static final String LOG_TAG = "Minichat";
+    public static final String PREFERENCES = BuildConfig.APPLICATION_ID + "_preferences";
 
     public final class Notification {
         public static final String CHANNEL_DOWNLOAD_ID = BuildConfig.APPLICATION_ID + ".DOWNLOAD";

@@ -1,7 +1,6 @@
 package com.ifsphto.vlp_info2_2017.minichat.page;
 
 import android.app.AlertDialog;
-import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.net.nsd.NsdServiceInfo;
 import android.os.Bundle;
@@ -15,7 +14,6 @@ import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.ListView;
 
-import com.ifsphto.vlp_info2_2017.minichat.LoginActivity;
 import com.ifsphto.vlp_info2_2017.minichat.R;
 import com.ifsphto.vlp_info2_2017.minichat.connection.NSDConnection;
 import com.ifsphto.vlp_info2_2017.minichat.database.DbManager;
@@ -30,9 +28,6 @@ import java.util.ArrayList;
  */
 public class ChatActivity extends AppCompatActivity {
 
-    // Strings dizendo qual o nome dos usuários desta conversa
-    private static String otherUser;
-    private static String hereUser;
     // Campo onde a mensagem é digitada
     private EditText send_message;
     // Adaptador para posicionar as mensagens corretamente na tela
@@ -43,27 +38,23 @@ public class ChatActivity extends AppCompatActivity {
 
     private SwipeRefreshLayout srl;
 
-    private NsdServiceInfo dInfo;
+    // Informações dos usuários
+    private NsdServiceInfo thisDev;
+    private NsdServiceInfo otherDev;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
-        // SharedPreferences aqui é criada, para posteriormente recuperar o nome do usuário atual
-        SharedPreferences prefs = getSharedPreferences(LoginActivity.LOGIN_PREFS, MODE_PRIVATE);
-
         messages_view = findViewById(R.id.messages_view);
 
-        dInfo = getIntent().getParcelableExtra("ServiceInfo");
-
-        // Obtém o nome dos dois usuários desta conversa
-        otherUser = dInfo.getServiceName();
-        hereUser = prefs.getString("name", null);
+        thisDev = getIntent().getParcelableExtra("Me");
+        otherDev = getIntent().getParcelableExtra("ServiceInfo");
 
         // Criará e setará o nome da pessoa com quem o usuário está conversando na barra superior
         Toolbar toolbar = findViewById(R.id.toolbar_chat);
-        toolbar.setTitle(otherUser);
+        toolbar.setTitle(otherDev.getServiceName());
 
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null)
@@ -88,7 +79,7 @@ public class ChatActivity extends AppCompatActivity {
     private void sendMessage(final String s) {
         new Thread(() -> {
             try {
-                NSDConnection.sendMessage(getApplicationContext(), hereUser, dInfo, s);
+                NSDConnection.sendMessage(getApplicationContext(), thisDev, otherDev, s);
                 runOnUiThread(this::loadMessages);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -99,10 +90,10 @@ public class ChatActivity extends AppCompatActivity {
 
     private void loadMessages() {
 
-        DbManager dbManager = new DbManager(this, otherUser.replace(" ", ""));
+        DbManager dbManager = new DbManager(this, otherDev.getServiceName());
 
         ma = new MessagesAdapter(this, R.id.msgr);
-        setMessages(dbManager.select(otherUser));
+        setMessages(dbManager.select());
 
         srl.setRefreshing(false);
     }
@@ -127,6 +118,9 @@ public class ChatActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.chat_info:
                 showInfoDialog();
+                break;
+            case android.R.id.home:
+                finish();
         }
 
         return super.onOptionsItemSelected(item);
@@ -134,11 +128,11 @@ public class ChatActivity extends AppCompatActivity {
 
     private void showInfoDialog() {
 
-        final String[] info = new String[3];
+        final String[] info = new String[2];
 
         Thread t = new Thread(() -> {
-            info[0] = dInfo.getHost().getHostAddress();
-            info[1] = String.valueOf(dInfo.getPort());
+            info[0] = otherDev.getHost().getHostAddress();
+            info[1] = String.valueOf(otherDev.getPort());
         });
 
         t.start();

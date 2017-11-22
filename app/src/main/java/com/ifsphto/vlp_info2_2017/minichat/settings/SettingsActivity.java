@@ -29,13 +29,10 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
     }
 
     private AlertDialog showDetailDialog(String message) {
-
-        AlertDialog.Builder dlg_log = new AlertDialog.Builder(this);
-        dlg_log.setTitle("Detalhes do Erro");
-        dlg_log.setMessage(message);
-        dlg_log.setNegativeButton("Ok", null);
-
-        return dlg_log.create();
+        return new AlertDialog.Builder(this)
+        .setTitle("Detalhes do Erro")
+        .setMessage(message)
+        .setNegativeButton("Ok", null).create();
     }
 
 }

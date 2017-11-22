@@ -38,12 +38,10 @@ import java.util.Observer;
 
 /**
  * Essa classe é, por enquanto a maior do projeto, ela é a pagina inicial
- * onde o usuário vê os posts de outros usuários
- *
- * Nessa classe principalmente iremos implementar o P2P
+ * onde o usuário vê suas mensagens e descobre outros dispositivos na rede
  */
 
-// TODO: 22/10/2017  Retirar ProgressDialog de todas as classes
+// TODO: 21/11/2017 Hardcoded Strings... passar para strings.xml
 
 public class MainPage extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, Observer {
@@ -90,7 +88,7 @@ public class MainPage extends AppCompatActivity
 
         nsdConn = new NSDConnection(this);
         nsdConn.register(prefs.getString("name", null));
-        // TODO: 18/11/2017 Transformar registro e broadcast do NSD em um serviço-
+        // TODO: 18/11/2017 Transformar registro e broadcast do NSD em um serviço
 
         mDevs.setOnItemClickListener((adapterView, view, i, l) -> {
             nsdConn.resolve(devs.getItem(i));
@@ -149,7 +147,7 @@ public class MainPage extends AppCompatActivity
 
         // Recupera cores para setar no gradiente
         SharedPreferences preferences = getSharedPreferences(
-                BuildConfig.APPLICATION_ID + "_preferences", MODE_PRIVATE);
+                Tags.PREFERENCES, MODE_PRIVATE);
 
         int start = preferences.getInt("GradStart", Color.BLACK);
         int center = preferences.getInt("GradCenter", Color.BLACK);
@@ -333,6 +331,7 @@ public class MainPage extends AppCompatActivity
 
             Intent it = new Intent(this, ChatActivity.class);
             it.putExtra("ServiceInfo", resolved);
+            it.putExtra("Me", nsdConn.si);
 
             startActivity(it);
         } else {

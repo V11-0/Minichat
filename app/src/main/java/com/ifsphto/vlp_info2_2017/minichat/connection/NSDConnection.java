@@ -27,14 +27,13 @@ public class NSDConnection extends Observable {
     private NsdManager.DiscoveryListener mDiscoveryListener;
     private NsdManager.RegistrationListener mRegistrationListener;
     private NsdManager.ResolveListener mResolver;
-    private int mLocalPort;
     private MainPage activity;
-    private NsdServiceInfo si;
     private ArrayAdapter<NsdServiceInfo> devices;
+
+    public NsdServiceInfo si;
 
     public NSDConnection(MainPage activity) {
         this.activity = activity;
-        initializeServerSocket();
         initializeRegistrationListener();
         initializeDiscoveryListener();
         initializeResolveListener();
@@ -51,21 +50,15 @@ public class NSDConnection extends Observable {
     }
 
     public void register(String name) {
-        registerService(name);
+        try {
+            registerService(name);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public ArrayAdapter<NsdServiceInfo> getDevices() {
         return devices;
-    }
-
-    private void initializeServerSocket() {
-        ServerSocket mServerSocket = null;
-        try {
-            mServerSocket = new ServerSocket(0);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        mLocalPort = mServerSocket.getLocalPort();
     }
 
     private void initializeResolveListener() {
@@ -83,17 +76,25 @@ public class NSDConnection extends Observable {
         };
     }
 
-    private void registerService(String name) {
+    private void registerService(String name) throws IOException {
+
+        ServerSocket mServer = new ServerSocket(0);
+        int port = mServer.getLocalPort();
 
         si = new NsdServiceInfo();
         si.setServiceName(name);
         si.setServiceType(Tags.Nsd.TYPE);
-        si.setPort(mLocalPort);
+        si.setPort(port);
+
+        mServer.close();
 
         mNsdManager = (NsdManager) activity.getSystemService(Context.NSD_SERVICE);
 
-        mNsdManager.registerService(si, NsdManager.PROTOCOL_DNS_SD, mRegistrationListener);
-        this.startNewMessagesListener();
+        if (mNsdManager != null) {
+            mNsdManager.registerService(si, NsdManager.PROTOCOL_DNS_SD, mRegistrationListener);
+            this.startNewMessagesListener(port);
+        } else
+            throw new NullPointerException("NsdManager is null");
     }
 
     private void notifyMainPage() {
@@ -202,32 +203,36 @@ public class NSDConnection extends Observable {
         }
     }
 
-    private void startNewMessagesListener() {
+    private void startNewMessagesListener(int port) {
         Intent service = new Intent(activity, MessageService.class);
-        service.putExtra("Host", si);
+        service.putExtra("ThisHost", si);
+        service.putExtra("Port", port);
 
         activity.startService(service);
     }
 
-    public static void sendMessage(Context context, String you, NsdServiceInfo dest, String msg)
-            throws Exception {
+    public static void sendMessage(Context context, NsdServiceInfo me
+            , NsdServiceInfo dest, String msg) throws Exception {
 
-        String table = dest.getServiceName().replace(" ", "");
-
-        Socket socket = new Socket(dest.getHost(), dest.getPort()+1);
+        Socket socket = new Socket(dest.getHost(), dest.getPort());
         DataOutputStream dOut = new DataOutputStream(socket.getOutputStream());
 
-        dOut.writeUTF(you);
+        String name = me.getServiceName();
+
+        dOut.writeUTF(name);
         dOut.writeUTF(msg);
+        dOut.writeInt(me.getPort());
         dOut.flush();
 
-        DbManager manager = new DbManager(context, table);
+        DbManager manager = new DbManager(context, dest.getServiceName());
 
-        if (manager.insert(you, msg)) {
+        if (manager.insert(name, msg)) {
             Log.i("Yeah", "Sem problemas");
         } else
             Log.e("Err", "Deu Ruim");
 
         dOut.close();
+        manager.close();
+        socket.close();
     }
 }

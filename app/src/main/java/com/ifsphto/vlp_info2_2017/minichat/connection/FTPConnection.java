@@ -44,7 +44,6 @@ public abstract class FTPConnection {
                 ftp.disconnect();
             }
 
-        } catch (IOException ignored) {
-        }
+        } catch (IOException ignored) {}
     }
 }

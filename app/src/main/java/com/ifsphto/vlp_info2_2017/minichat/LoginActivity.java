@@ -5,9 +5,11 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.Menu;
@@ -20,6 +22,7 @@ import android.widget.Toast;
 
 import com.ifsphto.vlp_info2_2017.minichat.page.MainPage;
 import com.ifsphto.vlp_info2_2017.minichat.settings.SettingsActivity;
+import com.ifsphto.vlp_info2_2017.minichat.utils.Tags;
 
 /**
  * Primeira tela do App, onde o usuário irá fazer um Login
@@ -60,9 +63,10 @@ public class LoginActivity extends AppCompatActivity {
         // de Wi-Fi do dispositivo dele
         if (mwifi == null) {
             Snackbar.make(sign_in, getString(R.string.err_no_network), Snackbar.LENGTH_INDEFINITE)
-                    .setAction(getString(R.string.err_no_net_action), v -> startActivityForResult(new Intent(Settings.ACTION_WIFI_SETTINGS), 0)).show();
+                    .setAction(getString(R.string.err_no_net_action), v ->
+                            startActivityForResult(new Intent(Settings.ACTION_WIFI_SETTINGS)
+                                    , 0)).show();
         }
-        // FIXME: 22/10/2017 Impedir login sem conexão. De maneira bem feita
 
         prog = findViewById(R.id.prog_spinner);
 
@@ -71,6 +75,23 @@ public class LoginActivity extends AppCompatActivity {
             sign_in.setClickable(false);
             getLoginData();
         });
+
+        if (Build.VERSION.SDK_INT == Build.VERSION_CODES.KITKAT) {
+            SharedPreferences preferences = getSharedPreferences(Tags.PREFERENCES, 0);
+
+            if (!preferences.getBoolean("isAdvised", false)) {
+                new AlertDialog.Builder(this).setTitle("Espere, parece que temos um problema")
+                        .setMessage("Seu Dispositivo está executando a versão 4.4 do Android. Durante" +
+                                " o desenvolvimento desse App, percebemos que a API que usamos " +
+                                "não funciona corretamente nesta versão\n\nEsteja ciente que o App pode não" +
+                                " funcionar como desejado.")
+
+                        .setPositiveButton("Eu Entendo", (dialogInterface, i) ->
+                                preferences.edit().putBoolean("isAdvised", true).apply())
+                        .setCancelable(false)
+                        .create().show();
+            }
+        }
     }
 
     /**
@@ -96,8 +117,8 @@ public class LoginActivity extends AppCompatActivity {
             focusView = edt_login;
             cancel = true;
         }
-        else if (user.length() > 70) {
-            edt_login.setError(getString(R.string.error_user_length));
+        else if (user.contains(" ")) {
+            edt_login.setError("Os nomes não podem conters espaços");
             focusView = edt_login;
             cancel = true;
         }
@@ -109,7 +130,7 @@ public class LoginActivity extends AppCompatActivity {
         }
         else {
 
-            showOrDismissProgress(true);
+            showProgress();
 
             // Executa a classe DoLogin para realizar a conexão
             SharedPreferences.Editor ed = prefs.edit();
@@ -121,21 +142,12 @@ public class LoginActivity extends AppCompatActivity {
 
     /**
      * Esse método dependendo do parametro exibirá o ProgressBar indicando
-     * que o login está sendo efetuado, ou ele faz o ProgressBar
-     * desaparecer e volta com todoo o layout
-     * @param show true para exibir progresso, false para normalizar o layout
+     * que o login está sendo efetuado.
      */
-    private void showOrDismissProgress(boolean show) {
-
-        if (show) {
-            prog.setVisibility(View.VISIBLE);
-            findViewById(R.id.login_form).setVisibility(View.GONE);
-            closeOptionsMenu();
-        } else {
-            prog.setVisibility(View.GONE);
-            findViewById(R.id.login_form).setVisibility(View.VISIBLE);
-            openOptionsMenu();
-        }
+    private void showProgress() {
+        prog.setVisibility(View.VISIBLE);
+        findViewById(R.id.login_form).setVisibility(View.GONE);
+        closeOptionsMenu();
     }
 
     @Override
@@ -149,10 +161,6 @@ public class LoginActivity extends AppCompatActivity {
 
         switch (item.getItemId()) {
 
-            case R.id.menu_new_user:
-                Intent it = new Intent(this, RegistrationActivity.class);
-                startActivityForResult(it, REQUEST_CODE_NEW_USER);
-                break;
             case R.id.stg_Item:
                 Intent its = new Intent(this, SettingsActivity.class);
                 startActivity(its);

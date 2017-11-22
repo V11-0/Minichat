@@ -29,23 +29,30 @@ import java.net.Socket;
 public class MessageService extends IntentService {
 
     public NsdServiceInfo thisHost;
+    private ServerSocket serverSocket;
 
     public MessageService() {
         super("Serviço de Mensagens");
     }
 
     @Override
+    public void onDestroy() {
+        try {
+            serverSocket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        super.onDestroy();
+    }
+
+    @Override
     protected void onHandleIntent(@Nullable Intent intent) {
 
         assert intent != null;
-        thisHost = intent.getParcelableExtra("Host");
-
-        ServerSocket serverSocket = null;
-
-        Log.d("Host", thisHost.toString());
+        thisHost = intent.getParcelableExtra("ThisHost");
 
         try {
-            serverSocket = new ServerSocket(thisHost.getPort()+1);
+            serverSocket = new ServerSocket(intent.getIntExtra("Port", 0));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -58,34 +65,35 @@ public class MessageService extends IntentService {
                     new Thread(() -> {
                         Log.i(Tags.LOG_TAG, "Recebido");
 
-                        Socket client_clone = client;
-
                         String name = null;
                         String msg = null;
+                        int port = 0;
+
                         try {
-                            DataInputStream in = new DataInputStream(client_clone.getInputStream());
+                            DataInputStream in = new DataInputStream(client.getInputStream());
 
                             name = in.readUTF();
                             msg = in.readUTF();
+                            port = in.readInt();
+
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
 
-                        DbManager manager = new DbManager(getApplicationContext()
-                                , name.replace(" ", ""));
+                        DbManager manager = new DbManager(getApplicationContext(), name);
 
                         NsdServiceInfo client_nsd = new NsdServiceInfo();
-                        client_nsd.setPort(client_clone.getPort());
                         client_nsd.setServiceName(name);
-                        client_nsd.setHost(client_clone.getInetAddress());
                         client_nsd.setServiceType(Tags.Nsd.TYPE);
-
-                        // TODO: 20/11/2017 Notificação com a porta correta, ou descobrir na tela de chat
+                        client_nsd.setPort(port);
+                        client_nsd.setHost(client.getInetAddress());
 
                         if (manager.insert(name, msg))
                             sendNotification(name, msg, client_nsd);
                         else
                             Log.e(Tags.LOG_TAG, "Erro ao salvar msg recebida no sqlite");
+
+                        manager.close();
                     }).start();
                 }
             } catch(Exception e){
@@ -97,12 +105,13 @@ public class MessageService extends IntentService {
 
     private void sendNotification(String name, String msg, NsdServiceInfo who) {
 
-        Uri sound = Uri.parse(getApplicationContext().getSharedPreferences(BuildConfig.APPLICATION_ID + "_preferences", 0)
-                .getString("pref_sound", ""));
+        Uri sound = Uri.parse(getApplicationContext().getSharedPreferences(Tags.PREFERENCES
+                , 0).getString("pref_sound", ""));
 
         PendingIntent resultIntent;
         TaskStackBuilder mTask = TaskStackBuilder.create(getBaseContext());
         Intent it = new Intent(this, ChatActivity.class);
+
         it.putExtra("ServiceInfo", who);
 
         mTask.addNextIntent(it);
@@ -123,6 +132,7 @@ public class MessageService extends IntentService {
                 .setSmallIcon(R.drawable.ic_chat_white_24dp)
                 .setSound(sound)
                 .setVibrate(new long[] {1000, 1000, 1000, 1000})
+                .setAutoCancel(true)
                 .setContentIntent(resultIntent);
 
         ntm.notify(2, builder.build());

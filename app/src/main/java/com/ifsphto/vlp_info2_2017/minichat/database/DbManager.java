@@ -34,7 +34,7 @@ public class DbManager extends SQLiteOpenHelper {
         db.execSQL(Tags.Database.CREATE.replace("?", table));
     }
 
-    public ArrayList<Message> select(String user) {
+    public ArrayList<Message> select() {
 
         SQLiteDatabase db = getReadableDatabase();
 
@@ -46,7 +46,7 @@ public class DbManager extends SQLiteOpenHelper {
         cursor.moveToFirst();
 
         for (int i = 0; i < cursor.getCount(); i++) {
-            messages.add(new Message(cursor.getString(1).equals(user), cursor.getString(2)));
+            messages.add(new Message(cursor.getString(1).equals(table), cursor.getString(2)));
             cursor.moveToNext();
         }
 
