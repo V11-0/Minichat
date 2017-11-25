@@ -64,7 +64,14 @@ public class ChatActivity extends AppCompatActivity {
         send_message = findViewById(R.id.send_message);
         FloatingActionButton fab = findViewById(R.id.fab_send_message);
         fab.setOnClickListener(view -> {
-            sendMessage(send_message.getText().toString());
+
+            String message = send_message.getText().toString();
+
+            if (message.equals("")) {
+                return;
+            } else
+                sendMessage(message);
+
             send_message.setText("");
         });
 
