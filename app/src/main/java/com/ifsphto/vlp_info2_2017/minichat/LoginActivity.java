@@ -117,11 +117,6 @@ public class LoginActivity extends AppCompatActivity {
             focusView = edt_login;
             cancel = true;
         }
-        else if (user.contains(" ")) {
-            edt_login.setError("Os nomes não podem conters espaços");
-            focusView = edt_login;
-            cancel = true;
-        }
 
         // O processo é cancelado e volta para a tela de login
         if (cancel) {

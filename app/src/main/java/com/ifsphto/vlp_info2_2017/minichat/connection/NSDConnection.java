@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
+import android.net.wifi.WifiManager;
 import android.util.Log;
 import android.widget.ArrayAdapter;
 
@@ -14,8 +15,13 @@ import com.ifsphto.vlp_info2_2017.minichat.utils.Tags;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.math.BigInteger;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.UnknownHostException;
+import java.nio.ByteOrder;
+import java.util.Formatter;
 import java.util.Observable;
 
 /**
@@ -126,9 +132,29 @@ public class NSDConnection extends Observable {
                     Log.i("Error", "Deu ruim no nome");
                     finishEverything();
                     activity.nameHasCollided();
-                } else
-                    activity.setDrawerText(nsdServiceInfo.getServiceName(), si.getPort());
-                Log.i(Tags.LOG_TAG, "Sucesso ao registrar serviço");
+                } else {
+
+                    WifiManager wifiManager = (WifiManager) activity.getApplicationContext()
+                            .getSystemService(Context.WIFI_SERVICE);
+
+                    int ipAddress = wifiManager.getConnectionInfo().getIpAddress();
+
+                    ipAddress = (ByteOrder.nativeOrder().equals(ByteOrder.LITTLE_ENDIAN)) ?
+                            Integer.reverseBytes(ipAddress) : ipAddress;
+
+                    byte[] ipBytes = BigInteger.valueOf(ipAddress).toByteArray();
+
+                    String ip = "Err";
+
+                    try {
+                        ip = InetAddress.getByAddress(ipBytes).getHostAddress();
+                    } catch (UnknownHostException e) {
+                        e.printStackTrace();
+                    }
+
+                    activity.setDrawerText(nsdServiceInfo.getServiceName(), ip + ":" +
+                            si.getPort());
+                }
             }
 
             @Override
@@ -224,7 +250,7 @@ public class NSDConnection extends Observable {
         dOut.writeInt(me.getPort());
         dOut.flush();
 
-        DbManager manager = new DbManager(context, dest.getServiceName());
+        DbManager manager = new DbManager(context, "'" + dest.getServiceName() + "'");
 
         if (manager.insert(name, msg)) {
             Log.i("Yeah", "Sem problemas");

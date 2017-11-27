@@ -80,7 +80,8 @@ public class MessageService extends IntentService {
                             e.printStackTrace();
                         }
 
-                        DbManager manager = new DbManager(getApplicationContext(), name);
+                        DbManager manager = new DbManager(getApplicationContext(), "'" + name
+                         + "'");
 
                         NsdServiceInfo client_nsd = new NsdServiceInfo();
                         client_nsd.setServiceName(name);

@@ -15,6 +15,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.app.AlertDialog;
+import android.text.InputFilter;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -26,7 +27,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.ifsphto.vlp_info2_2017.minichat.BuildConfig;
 import com.ifsphto.vlp_info2_2017.minichat.LoginActivity;
 import com.ifsphto.vlp_info2_2017.minichat.R;
 import com.ifsphto.vlp_info2_2017.minichat.connection.NSDConnection;
@@ -63,7 +63,7 @@ public class MainPage extends AppCompatActivity
     private ArrayAdapter<NsdServiceInfo> devs;
 
     private TextView userId;
-    private TextView userEmail;
+    private TextView userHost;
 
     @Override
     protected void onDestroy() {
@@ -105,19 +105,26 @@ public class MainPage extends AppCompatActivity
         edt_name.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT
                 , ViewGroup.LayoutParams.MATCH_PARENT));
 
+        edt_name.setFilters(new InputFilter[] {
+                new InputFilter.LengthFilter(50)});
+
         AlertDialog.Builder new_name = new AlertDialog.Builder(this);
         new_name.setTitle("Opa, deu merda").setMessage("Há alguem com o mesmo nome na rede. É " +
                 "melhor muda-lo: ").setPositiveButton("OK", (dialogInterface, i) -> {
 
             String naime = edt_name.getText().toString();
 
-            nsdConn.register(naime);
+            if (naime.equals("")) {
+                Toast.makeText(this, "Não deixe o nome vazio", Toast.LENGTH_SHORT).show();
+                return;
+            } else {
+                nsdConn.register(naime);
 
-            SharedPreferences.Editor ed = prefs.edit();
-            ed.putString("name", naime);
-            ed.apply();
-
-        }).setView(edt_name).create().show();
+                SharedPreferences.Editor ed = prefs.edit();
+                ed.putString("name", naime);
+                ed.apply();
+            }
+        }).setView(edt_name).setCancelable(false).create().show();
     }
 
     private void setLayout() {
@@ -172,7 +179,7 @@ public class MainPage extends AppCompatActivity
 
         // Recupera os TextView que estão na imagem da barra lateral
         userId = headerView.findViewById(R.id.drawer_user);
-        userEmail = headerView.findViewById(R.id.drawer_port);
+        userHost = headerView.findViewById(R.id.drawer_host);
 
         GradientDrawable gradientDrawable = new GradientDrawable(orientation
         , new int[] {start, center, end});
@@ -315,10 +322,10 @@ public class MainPage extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
-    public void setDrawerText(String serviceName, int port) {
+    public void setDrawerText(String serviceName, String host) {
         runOnUiThread(() -> {
             userId.setText(serviceName);
-            userEmail.setText(String.valueOf(port));
+            userHost.setText(host);
         });
     }
 
