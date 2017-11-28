@@ -30,6 +30,7 @@
         <activity
             android:name=".page.MainPage"
             android:label="@string/drawer_messages"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <provider
             android:name="android.support.v4.content.FileProvider"

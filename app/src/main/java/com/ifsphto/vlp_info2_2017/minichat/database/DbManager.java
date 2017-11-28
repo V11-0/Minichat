@@ -20,7 +20,7 @@ public class DbManager extends SQLiteOpenHelper {
 
     public DbManager(Context context, String table) {
         super(context, Tags.Database.MSG_DATABASE_NAME, null, 1);
-        this.table = table;
+        this.table = "'" + table + "'";
     }
 
     @Override
@@ -46,7 +46,7 @@ public class DbManager extends SQLiteOpenHelper {
         cursor.moveToFirst();
 
         for (int i = 0; i < cursor.getCount(); i++) {
-            messages.add(new Message(cursor.getString(1).equals(table), cursor.getString(2)));
+            messages.add(new Message(("'" + cursor.getString(1) + "'").equals(table), cursor.getString(2)));
             cursor.moveToNext();
         }
 

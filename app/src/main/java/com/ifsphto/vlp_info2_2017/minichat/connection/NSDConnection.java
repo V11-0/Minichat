@@ -250,7 +250,7 @@ public class NSDConnection extends Observable {
         dOut.writeInt(me.getPort());
         dOut.flush();
 
-        DbManager manager = new DbManager(context, "'" + dest.getServiceName() + "'");
+        DbManager manager = new DbManager(context, dest.getServiceName());
 
         if (manager.insert(name, msg)) {
             Log.i("Yeah", "Sem problemas");
