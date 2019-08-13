@@ -1,11 +1,13 @@
 # Minichat
 
-Minichat é o nosso projeto de APS e LPA do 2º Ano do Curso Técnico
-Integrado em Informática do IFSP-HTO
+Minichat foi um projeto feito no curso técnico de Informática no IFSP-HTO
 
 Ele consiste em um sistema de chat utilizando as APIs de NSD
-(Network Service Discovery) fornecidas pelo Android
+(Network Service Discovery) fornecidas pelo Android.
 
-## Objetivo Principal Atual
+### Recomeçando
 
-Melhorar a conexão e corrigir bugs
+O projeto foi apresentado em novembro de 2017, e depois disso, nada dele
+foi alterado.
+
+Agora em 2019 decidi recomeçar o projeto e deixa-lo usável da forma como foi inicialmente proposto.
