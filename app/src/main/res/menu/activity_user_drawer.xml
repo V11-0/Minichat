@@ -7,6 +7,7 @@
             android:icon="@drawable/ic_chat_black_24dp"
             android:title="@string/drawer_messages" />
         <item
+            android:checked="true"
             android:id="@+id/discover_devices"
             android:icon="@drawable/ic_leak_add_black_24dp"
             android:title="@string/title_discover_drawer" />

@@ -8,7 +8,7 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.ifsphto.vlp_info2_2017.minichat.LoginActivity">
+    tools:context=".LoginActivity">
 
     <ProgressBar
         android:id="@+id/prog_spinner"
